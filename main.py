@@ -5,6 +5,7 @@ from sklearn import preprocessing
 from scipy.interpolate import interp1d
 from scipy.signal import butter, filtfilt, medfilt
 from scipy.fft import fft, ifft
+from scipy.spatial import ConvexHull
 import pywt
 
 
@@ -82,8 +83,12 @@ fourier_y = []
 fourier_x = [ele.real for ele in fourier]
 fourier_y = [ele.imag for ele in fourier]
 
+points = [[ele.real, ele.imag] for ele in fourier]
+arr_points = np.array(points)
+hull = ConvexHull(arr_points)
 
-print(fourier)
+
+
 N = int(40 *fs)
 
 rms_values = []
@@ -132,7 +137,11 @@ for i in range(0, len(modulated_signal)):
 # ax6.set_title("RMS")
 # ax6.grid()
 
+
 plt.scatter(fourier_x, fourier_y)
-plt.xlim(-0.4, 0.4, 0.2)
+
+for simplex in hull.simplices:
+    plt.plot(arr_points[simplex, 0], arr_points[simplex, 1], 'k-')
+# plt.xlim(-0.4, 0.4, 0.2)
 plt.tight_layout()
 plt.show()
