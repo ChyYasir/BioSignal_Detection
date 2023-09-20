@@ -6,6 +6,8 @@ from scipy.interpolate import interp1d
 from scipy.signal import butter, filtfilt, medfilt
 from scipy.fft import fft, ifft
 from scipy.spatial import ConvexHull
+import alphashape
+from shapely.geometry import Point
 import pywt
 
 
@@ -88,6 +90,18 @@ arr_points = np.array(points)
 hull = ConvexHull(arr_points)
 
 
+# point_objects = [Point(x, y) for x, y in arr_points]
+# Define the alpha parameter for concavity level (adjust as needed)
+alpha = 5.0
+
+# Create the alpha shape
+alpha_shape = alphashape.alphashape(arr_points, alpha)
+
+# Extract the edges (LineString) of the alpha shape
+edges = alpha_shape.boundary
+
+# Extract the x and y coordinates of the edges
+x_edges, y_edges = edges.xy
 
 N = int(40 *fs)
 
@@ -139,9 +153,9 @@ for i in range(0, len(modulated_signal)):
 
 
 plt.scatter(fourier_x, fourier_y)
-
-for simplex in hull.simplices:
-    plt.plot(arr_points[simplex, 0], arr_points[simplex, 1], 'k-')
+plt.plot(x_edges, y_edges, 'k-', label='Alpha Shape Edges')
+# for simplex in hull.simplices:
+#     plt.plot(arr_points[simplex, 0], arr_points[simplex, 1], 'k-')
 # plt.xlim(-0.4, 0.4, 0.2)
 plt.tight_layout()
 plt.show()
