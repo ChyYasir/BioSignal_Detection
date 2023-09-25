@@ -14,7 +14,7 @@ import pywt
 # Import the interpolation function
 from math import sqrt
 # Load the record and extract the signal data
-record = wfdb.rdrecord('D:/term-preterm-ehg-dataset-with-tocogram-1.0.0/tpehgt_p008')
+record = wfdb.rdrecord('D:/term-preterm-ehg-dataset-with-tocogram-1.0.0/tpehgt_t001')
 signal_data = record.p_signal
 
 # Extract sampling frequency
@@ -55,6 +55,8 @@ b, a = butter(order, [low, high], btype='band')
 filtered_signal = filtfilt(b, a, signal_data[:, signal_index])
 
 med_filtered_signal = medfilt(filtered_signal, kernel_size=3)
+
+print(len(med_filtered_signal))
 for i in range(0, signal_data.shape[0] - window_size + 1, step_size_samples):
     # segment = signal_data[i:i + window_size, signal_index]
     segment = med_filtered_signal[i: i + window_size]
@@ -106,6 +108,8 @@ x_edges, y_edges = edges.xy
 N = int(40 *fs)
 
 rms_values = []
+
+
 for i in range(0, len(modulated_signal)):
     j = i
     rms = 0.0
@@ -117,43 +121,74 @@ for i in range(0, len(modulated_signal)):
     rms = rms / N
     rms = sqrt(rms)
     rms_values.append(rms)
+
+tmp_rms = rms_values
+sorted_rms = sorted(tmp_rms)
+
+
+
+signal_range = sorted_rms[len(sorted_rms) - 1] - sorted_rms[0]
+length = len(sorted_rms)//10
+
+mean = 0
+for i in range(0, length):
+    mean = mean + sorted_rms[i]
+
+mean = mean / length
+# t = mean + h * std ;
+threshold = 1.2 * (mean + 0.25 * (signal_range))
+# basal_tone = mean of (10% of lowest values)
+
+# mean_value = np.mean(rms_values)
+# std_deviation = np.std(rms_values)
+# h = 3
+# threshold = mean_value + h * std_deviation
+
+
+
+
+
 # Plot the original signal, power of zero crossing rates, and the modulated signal
-# fig, (ax1, ax2, ax3, ax4, ax5, ax6, ax7) = plt.subplots(7, 1, figsize=(10, 12), sharex=True)
-#
-# ax1.plot(time, med_filtered_signal, label='Original Signal')
-# ax1.set_ylabel('Amplitude')
-# ax1.set_title(f'Signal: {record.sig_name[signal_index]}')
-# ax1.grid()
-#
-# ax2.plot(timestamps, zero_crossing_rates, color='r', label='Zero Crossing Rate')
-# ax2.set_ylabel('Zero Crossing Rate')
-# ax2.set_title('Zero Crossing Rate')
-# ax2.grid()
-#
-# ax3.plot(time, interpolated_normalized_power, color='g', label='Interpolated Normalized Power')
-# ax3.set_ylabel('Interpolated Power')
-# ax3.set_title('Interpolated Normalized Power')
-# ax3.grid()
-#
-# ax4.plot(time, modulated_signal, color='b', label='Modulated Signal')
-# ax4.set_ylabel('Amplitude')
-# ax4.set_title('Modulated Signal')
-# ax4.grid()
-#
-# ax5.plot(time, signal_data[:, 6], label='Original Signal')
-# ax5.set_ylabel('Amplitude')
-# ax5.set_title(f'Signal: {record.sig_name[6]}')
-# ax5.grid()
-#
-# ax6.plot(time, rms_values, label='RMS')
-# ax6.set_ylabel('Amplitude')
-# ax6.set_xlabel('Time (seconds)')
-# ax6.set_title("RMS")
-# ax6.grid()
+fig, (ax1, ax2, ax3, ax4, ax5, ax6) = plt.subplots(6, 1, figsize=(10, 12), sharex=True)
+
+ax1.plot(time, med_filtered_signal, label='Original Signal')
+ax1.set_ylabel('Amplitude')
+ax1.set_title(f'Signal: {record.sig_name[signal_index]}')
+ax1.grid()
+
+ax2.plot(timestamps, zero_crossing_rates, color='r', label='Zero Crossing Rate')
+ax2.set_ylabel('Zero Crossing Rate')
+ax2.set_title('Zero Crossing Rate')
+ax2.grid()
+
+ax3.plot(time, interpolated_normalized_power, color='g', label='Interpolated Normalized Power')
+ax3.set_ylabel('Interpolated Power')
+ax3.set_title('Interpolated Normalized Power')
+ax3.grid()
+
+ax4.plot(time, modulated_signal, color='b', label='Modulated Signal')
+ax4.set_ylabel('Amplitude')
+ax4.set_title('Modulated Signal')
+ax4.grid()
+
+ax5.plot(time, signal_data[:, 6], label='Original Signal')
+ax5.set_ylabel('Amplitude')
+ax5.set_title(f'Signal: {record.sig_name[6]}')
+ax5.grid()
+
+ax6.plot(time, rms_values, label='RMS')
+ax6.set_ylabel('Amplitude')
+ax6.set_xlabel('Time (seconds)')
+ax6.set_title("RMS")
+ax6.grid()
+
+ax6.axhline(y = threshold, color = 'r')
 
 
-plt.scatter(fourier_x, fourier_y)
-plt.plot(x_edges, y_edges, 'k-', label='Alpha Shape Edges')
+# plt.scatter(fourier_x, fourier_y)
+# plt.plot(x_edges, y_edges, 'k-', label='Alpha Shape Edges')
+
+
 # for simplex in hull.simplices:
 #     plt.plot(arr_points[simplex, 0], arr_points[simplex, 1], 'k-')
 # plt.xlim(-0.4, 0.4, 0.2)
