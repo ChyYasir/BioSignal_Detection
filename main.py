@@ -155,7 +155,7 @@ for i in range(0, len(rms_values)):
             duration = r-l+1
             duration = duration / fs
             if duration >= 30:
-                print("l = " + str(l/fs) + " : r = " + str(r/fs))
+                # print("l = " + str(l/fs) + " : r = " + str(r/fs))
                 for j in range(l, r):
                     contraction_array[j] = rms_values[j]
             l = -1
@@ -223,7 +223,7 @@ plt.figure(1)
 
 print(len(med_filtered_signal))
 plt.figure(2)
-concave_hull = AlphaConcaveHull(modulated_signal, 1.0)
+concave_hull = AlphaConcaveHull(modulated_signal, 5.0)
 concave_hull.execute()
 
 # plt.scatter(fourier_x, fourier_y)
