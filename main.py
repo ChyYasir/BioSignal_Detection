@@ -9,12 +9,12 @@ from scipy.spatial import ConvexHull
 import alphashape
 from shapely.geometry import Point
 import pywt
-
+from concave_hull_fourier import AlphaConcaveHull
 
 # Import the interpolation function
 from math import sqrt
 # Load the record and extract the signal data
-record = wfdb.rdrecord('D:/term-preterm-ehg-dataset-with-tocogram-1.0.0/tpehgt_t001')
+record = wfdb.rdrecord('D:/term-preterm-ehg-dataset-with-tocogram-1.0.0/tpehgt_p008')
 signal_data = record.p_signal
 
 # Extract sampling frequency
@@ -79,31 +79,33 @@ modulated_signal = signal_data[:, signal_index] * interpolated_normalized_power
 # print(len(interpolated_normalized_power))
 # print(len(modulated_signal))
 
-fourier = fft(modulated_signal)
+# fourier = fft(modulated_signal)
+#
+# fourier_x = []
+# fourier_y = []
+#
+# fourier_x = [ele.real for ele in fourier]
+# fourier_y = [ele.imag for ele in fourier]
+#
+# points = [[ele.real, ele.imag] for ele in fourier]
+# arr_points = np.array(points)
 
-fourier_x = []
-fourier_y = []
 
-fourier_x = [ele.real for ele in fourier]
-fourier_y = [ele.imag for ele in fourier]
-
-points = [[ele.real, ele.imag] for ele in fourier]
-arr_points = np.array(points)
-hull = ConvexHull(arr_points)
+# hull = ConvexHull(arr_points)
 
 
 # point_objects = [Point(x, y) for x, y in arr_points]
 # Define the alpha parameter for concavity level (adjust as needed)
-alpha = 5.0
-
-# Create the alpha shape
-alpha_shape = alphashape.alphashape(arr_points, alpha)
-
-# Extract the edges (LineString) of the alpha shape
-edges = alpha_shape.boundary
-
-# Extract the x and y coordinates of the edges
-x_edges, y_edges = edges.xy
+# alpha = 5.0
+#
+# # Create the alpha shape
+# alpha_shape = alphashape.alphashape(arr_points, alpha)
+#
+# # Extract the edges (LineString) of the alpha shape
+# edges = alpha_shape.boundary
+#
+# # Extract the x and y coordinates of the edges
+# x_edges, y_edges = edges.xy
 
 N = int(40 *fs)
 
@@ -126,7 +128,6 @@ tmp_rms = rms_values
 sorted_rms = sorted(tmp_rms)
 
 
-
 signal_range = sorted_rms[len(sorted_rms) - 1] - sorted_rms[0]
 length = len(sorted_rms)//10
 
@@ -137,6 +138,33 @@ for i in range(0, length):
 mean = mean / length
 # t = mean + h * std ;
 threshold = 1.2 * (mean + 0.25 * (signal_range))
+
+l = -1
+r = -1
+contraction_array = []
+for i in range(0, len(rms_values)):
+    contraction_array.append(threshold)
+    if l == -1:
+        if rms_values[i] >= threshold:
+            l = i
+            continue
+
+    if l != -1 and r == -1:
+        if rms_values[i] <= threshold:
+            r = i
+            duration = r-l+1
+            duration = duration / fs
+            if duration >= 30:
+                print("l = " + str(l/fs) + " : r = " + str(r/fs))
+                for j in range(l, r):
+                    contraction_array[j] = rms_values[j]
+            l = -1
+            r = -1
+
+
+
+
+
 # basal_tone = mean of (10% of lowest values)
 
 # mean_value = np.mean(rms_values)
@@ -149,41 +177,54 @@ threshold = 1.2 * (mean + 0.25 * (signal_range))
 
 
 # Plot the original signal, power of zero crossing rates, and the modulated signal
-fig, (ax1, ax2, ax3, ax4, ax5, ax6) = plt.subplots(6, 1, figsize=(10, 12), sharex=True)
+plt.figure(1)
 
-ax1.plot(time, med_filtered_signal, label='Original Signal')
-ax1.set_ylabel('Amplitude')
-ax1.set_title(f'Signal: {record.sig_name[signal_index]}')
-ax1.grid()
 
-ax2.plot(timestamps, zero_crossing_rates, color='r', label='Zero Crossing Rate')
-ax2.set_ylabel('Zero Crossing Rate')
-ax2.set_title('Zero Crossing Rate')
-ax2.grid()
+# fig, (ax1, ax2, ax3, ax4, ax5, ax6, ax7) = plt.subplots(7, 1, figsize=(10, 12), sharex=True)
+#
+# ax1.plot(time, med_filtered_signal, label='Original Signal')
+# ax1.set_ylabel('Amplitude')
+# ax1.set_title(f'Signal: {record.sig_name[signal_index]}')
+# ax1.grid()
+#
+# ax2.plot(timestamps, zero_crossing_rates, color='r', label='Zero Crossing Rate')
+# ax2.set_ylabel('Zero Crossing Rate')
+# ax2.set_title('Zero Crossing Rate')
+# ax2.grid()
+#
+# ax3.plot(time, interpolated_normalized_power, color='g', label='Interpolated Normalized Power')
+# ax3.set_ylabel('Interpolated Power')
+# ax3.set_title('Interpolated Normalized Power')
+# ax3.grid()
+#
+# ax4.plot(time, modulated_signal, color='b', label='Modulated Signal')
+# ax4.set_ylabel('Amplitude')
+# ax4.set_title('Modulated Signal')
+# ax4.grid()
+#
+# ax5.plot(time, signal_data[:, 6], label='Original Signal')
+# ax5.set_ylabel('Amplitude')
+# ax5.set_title(f'Signal: {record.sig_name[6]}')
+# ax5.grid()
+#
+# ax6.plot(time, rms_values, label='RMS')
+# ax6.set_ylabel('Amplitude')
+# ax6.set_xlabel('Time (seconds)')
+# ax6.set_title("RMS")
+# ax6.grid()
+#
+# ax6.axhline(y = threshold, color = 'r')
+#
+# ax7.plot(time, contraction_array, label='RMS')
+# ax7.set_ylabel('Amplitude')
+# ax7.set_xlabel('Time (seconds)')
+# ax7.set_title("RMS")
+# ax7.grid()
 
-ax3.plot(time, interpolated_normalized_power, color='g', label='Interpolated Normalized Power')
-ax3.set_ylabel('Interpolated Power')
-ax3.set_title('Interpolated Normalized Power')
-ax3.grid()
-
-ax4.plot(time, modulated_signal, color='b', label='Modulated Signal')
-ax4.set_ylabel('Amplitude')
-ax4.set_title('Modulated Signal')
-ax4.grid()
-
-ax5.plot(time, signal_data[:, 6], label='Original Signal')
-ax5.set_ylabel('Amplitude')
-ax5.set_title(f'Signal: {record.sig_name[6]}')
-ax5.grid()
-
-ax6.plot(time, rms_values, label='RMS')
-ax6.set_ylabel('Amplitude')
-ax6.set_xlabel('Time (seconds)')
-ax6.set_title("RMS")
-ax6.grid()
-
-ax6.axhline(y = threshold, color = 'r')
-
+print(len(med_filtered_signal))
+plt.figure(2)
+concave_hull = AlphaConcaveHull(modulated_signal, 1.0)
+concave_hull.execute()
 
 # plt.scatter(fourier_x, fourier_y)
 # plt.plot(x_edges, y_edges, 'k-', label='Alpha Shape Edges')
@@ -192,5 +233,5 @@ ax6.axhline(y = threshold, color = 'r')
 # for simplex in hull.simplices:
 #     plt.plot(arr_points[simplex, 0], arr_points[simplex, 1], 'k-')
 # plt.xlim(-0.4, 0.4, 0.2)
-plt.tight_layout()
+# plt.tight_layout()
 plt.show()
