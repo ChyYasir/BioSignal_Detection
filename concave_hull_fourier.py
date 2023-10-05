@@ -27,7 +27,7 @@ class AlphaConcaveHull:
         # Extract the edges (LineString) of the alpha shape
         edges = alpha_shape.boundary
 
-        # Extract the x and y coordinates of the edges
+        # # Extract the x and y coordinates of the edges
         x_edges, y_edges = edges.xy
         area = 0
         perimeter = 0
@@ -55,14 +55,21 @@ class AlphaConcaveHull:
         y_edges_convex = hull_vertices[:, 1]
         n = len(x_edges_convex)
         convex_perimeter = 0
+        bending_energy = 0
+        omega = (2 * pi) / perimeter
         for i in range(0, n):
-
             dis_x = (x_edges_convex[(i+1)%n] - x_edges_convex[i]) * (x_edges_convex[(i+1)%n] - x_edges_convex[i])
             dis_y = (y_edges_convex[(i+1)%n] - y_edges_convex[i]) * (y_edges_convex[(i+1)%n] - y_edges_convex[i])
-            convex_perimeter = convex_perimeter + math.sqrt(dis_x+dis_y)
+            convex_perimeter = convex_perimeter + math.sqrt(dis_x + dis_y)
 
+        n = len(x_edges)
+        for i in range(0, n):
+            bending_energy = bending_energy + ((x_edges[i]**2) + (y_edges[i]**2))
+
+        bending_energy = bending_energy * ((perimeter**2)/n)
         convexity = convex_perimeter / perimeter
         print("Convextiy = " + str(convexity))
+        print("Bending Energy = "+ str(bending_energy))
         plt.scatter(self.fourier_x, self.fourier_y)
         plt.plot(x_edges, y_edges, 'k-', label='Alpha Shape Edges')
         plt.plot(hull_vertices[:, 0], hull_vertices[:, 1], 'r-', lw=2, label='Convex Hull')
