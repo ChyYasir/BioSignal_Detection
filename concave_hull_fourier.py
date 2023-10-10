@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.fft import fft, ifft
 from scipy.spatial import ConvexHull
+from shapely.geometry import Polygon
 import alphashape
 import math
 
@@ -12,6 +13,11 @@ class AlphaConcaveHull:
         self.fourier_y = []
         self.alpha = alpha
 
+    def dist_between_two_point(self, x1, y1, x2, y2):
+        dis_x = (x1 - x2) * (x1-x2)
+        dis_y = (y1- y2) * (y1 - y2)
+        ans = math.sqrt(dis_x + dis_y)
+        return ans
     def execute(self):
         fourier = fft(self.signal)
 
@@ -29,10 +35,18 @@ class AlphaConcaveHull:
 
         # # Extract the x and y coordinates of the edges
         x_edges, y_edges = edges.xy
+
+
+
+
         area = 0
         perimeter = 0
         n = len(x_edges)
+
+        vertices = []
         for i in range(0, n):
+            vertices.append((x_edges[i], y_edges[i]))
+
             area = area + abs((x_edges[i]* y_edges[(i+1)%n]) - (x_edges[(i+1)%n]*y_edges[i]))
             dis_x = (x_edges[(i+1)%n] - x_edges[i]) * (x_edges[(i+1)%n] - x_edges[i])
             dis_y = (y_edges[(i+1)%n] - y_edges[i]) * (y_edges[(i+1)%n] - y_edges[i])
@@ -70,6 +84,28 @@ class AlphaConcaveHull:
         convexity = convex_perimeter / perimeter
         print("Convextiy = " + str(convexity))
         print("Bending Energy = "+ str(bending_energy))
+
+        # For variance calculation we have to determine the centroid
+
+        print(vertices)
+        polygon = Polygon(vertices)
+        # Get the centroid
+        centroid = polygon.centroid
+
+        # Access the (x, y) coordinates of the centroid
+        centroid_x, centroid_y = centroid.x, centroid.y
+
+        print("Centroid coordinates (x, y):", centroid_x, centroid_y)
+        n = len(x_edges)
+        variance = 0
+        for i in range(n):
+            centroid_to_current = self.dist_between_two_point(centroid_x, centroid_y, x_edges[i], y_edges[i])
+            variance = variance + (centroid_to_current * centroid_to_current)
+
+        variance = variance / n
+
+        print("Variance = " , str(variance))
+
         plt.scatter(self.fourier_x, self.fourier_y)
         plt.plot(x_edges, y_edges, 'k-', label='Alpha Shape Edges')
         plt.plot(hull_vertices[:, 0], hull_vertices[:, 1], 'r-', lw=2, label='Convex Hull')

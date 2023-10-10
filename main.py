@@ -14,7 +14,7 @@ from concave_hull_fourier import AlphaConcaveHull
 # Import the interpolation function
 from math import sqrt
 # Load the record and extract the signal data
-record = wfdb.rdrecord('D:/term-preterm-ehg-dataset-with-tocogram-1.0.0/tpehgt_p008')
+record = wfdb.rdrecord('D:/term-preterm-ehg-dataset-with-tocogram-1.0.0/tpehgt_t008')
 signal_data = record.p_signal
 
 # Extract sampling frequency
@@ -24,7 +24,7 @@ print(fs)
 time = np.arange(0, signal_data.shape[0]) / fs
 
 # Choose the signal index you want to analyze
-signal_index = 1  # Change this to the desired signal index
+signal_index = 5  # Change this to the desired signal index
 
 # Define the sliding window width and step size
 window_width = 120  # in seconds
@@ -41,7 +41,7 @@ power_zero_crossing = []
 
 # Define the filter parameters
 lowcut = 0.08
-highcut = 4
+highcut = 3
 
 nyquist_freq = 0.5 * fs
 low = lowcut / nyquist_freq
@@ -52,11 +52,15 @@ order = 4
 b, a = butter(order, [low, high], btype='band')
 
 # Apply the filter to the signal
+for i in range(0, len(signal_data[:, signal_index])):
+    signal_data[i, signal_index] = signal_data[i, signal_index]
+
+print(signal_data[:, signal_index])
 filtered_signal = filtfilt(b, a, signal_data[:, signal_index])
 
 med_filtered_signal = medfilt(filtered_signal, kernel_size=3)
 
-print(len(med_filtered_signal))
+# print(len(med_filtered_signal))
 for i in range(0, signal_data.shape[0] - window_size + 1, step_size_samples):
     # segment = signal_data[i:i + window_size, signal_index]
     segment = med_filtered_signal[i: i + window_size]
@@ -75,37 +79,7 @@ interpolated_normalized_power = interpolator(time)
 
 # Modulate the original signal with the interpolated normalized power
 modulated_signal = signal_data[:, signal_index] * interpolated_normalized_power
-# print(len(zero_crossing_rates))
-# print(len(interpolated_normalized_power))
-# print(len(modulated_signal))
 
-# fourier = fft(modulated_signal)
-#
-# fourier_x = []
-# fourier_y = []
-#
-# fourier_x = [ele.real for ele in fourier]
-# fourier_y = [ele.imag for ele in fourier]
-#
-# points = [[ele.real, ele.imag] for ele in fourier]
-# arr_points = np.array(points)
-
-
-# hull = ConvexHull(arr_points)
-
-
-# point_objects = [Point(x, y) for x, y in arr_points]
-# Define the alpha parameter for concavity level (adjust as needed)
-# alpha = 5.0
-#
-# # Create the alpha shape
-# alpha_shape = alphashape.alphashape(arr_points, alpha)
-#
-# # Extract the edges (LineString) of the alpha shape
-# edges = alpha_shape.boundary
-#
-# # Extract the x and y coordinates of the edges
-# x_edges, y_edges = edges.xy
 
 N = int(40 *fs)
 
@@ -131,13 +105,20 @@ sorted_rms = sorted(tmp_rms)
 signal_range = sorted_rms[len(sorted_rms) - 1] - sorted_rms[0]
 length = len(sorted_rms)//10
 
-mean = 0
-for i in range(0, length):
-    mean = mean + sorted_rms[i]
+# mean = 0
+# for i in range(0, length):
+#     mean = mean + sorted_rms[i]
+#
+# mean = mean / length
 
-mean = mean / length
+mean_value = np.mean(modulated_signal)
+std_deviation = np.std(modulated_signal)
+h = 2
+
+
+threshold = mean_value + h * std_deviation
 # t = mean + h * std ;
-threshold = 1.2 * (mean + 0.25 * (signal_range))
+# threshold = 1.2 * (mean + 0.25 * (signal_range))
 
 l = -1
 r = -1
@@ -156,7 +137,7 @@ for i in range(0, len(rms_values)):
             duration = duration / fs
             if duration >= 30:
                 # print("l = " + str(l/fs) + " : r = " + str(r/fs))
-                for j in range(l, r):
+                for j in range(l, r+1):
                     contraction_array[j] = rms_values[j]
             l = -1
             r = -1
@@ -167,10 +148,8 @@ for i in range(0, len(rms_values)):
 
 # basal_tone = mean of (10% of lowest values)
 
-# mean_value = np.mean(rms_values)
-# std_deviation = np.std(rms_values)
-# h = 3
-# threshold = mean_value + h * std_deviation
+
+
 
 
 
@@ -182,7 +161,7 @@ plt.figure(1)
 
 # fig, (ax1, ax2, ax3, ax4, ax5, ax6, ax7) = plt.subplots(7, 1, figsize=(10, 12), sharex=True)
 #
-# ax1.plot(time, med_filtered_signal, label='Original Signal')
+# ax1.plot(time, signal_data[:, signal_index], label='Original Signal')
 # ax1.set_ylabel('Amplitude')
 # ax1.set_title(f'Signal: {record.sig_name[signal_index]}')
 # ax1.grid()
@@ -212,7 +191,6 @@ plt.figure(1)
 # ax6.set_xlabel('Time (seconds)')
 # ax6.set_title("RMS")
 # ax6.grid()
-#
 # ax6.axhline(y = threshold, color = 'r')
 #
 # ax7.plot(time, contraction_array, label='RMS')
@@ -221,7 +199,7 @@ plt.figure(1)
 # ax7.set_title("RMS")
 # ax7.grid()
 
-print(len(med_filtered_signal))
+# print(len(med_filtered_signal))
 plt.figure(2)
 concave_hull = AlphaConcaveHull(modulated_signal, 5.0)
 concave_hull.execute()
