@@ -55,9 +55,9 @@ class AlphaConcaveHull:
         pi = math.pi
         circularity = 4 * pi * area
         circularity = circularity / (perimeter * perimeter)
-        print("Area = " + str(area))
-        print("Perimeter = " + str(perimeter))
-        print("Circularity = " + str(circularity))
+        # print("Area = " + str(area))
+        # print("Perimeter = " + str(perimeter))
+        # print("Circularity = " + str(circularity))
 
         # Create a ConvexHull object from the points
         hull = ConvexHull(arr_points)
@@ -82,12 +82,12 @@ class AlphaConcaveHull:
 
         bending_energy = bending_energy * ((perimeter**2)/n)
         convexity = convex_perimeter / perimeter
-        print("Convextiy = " + str(convexity))
-        print("Bending Energy = "+ str(bending_energy))
+        # print("Convextiy = " + str(convexity))
+        # print("Bending Energy = "+ str(bending_energy))
 
         # For variance calculation we have to determine the centroid
 
-        print(vertices)
+        # print(vertices)
         polygon = Polygon(vertices)
         # Get the centroid
         centroid = polygon.centroid
@@ -95,7 +95,7 @@ class AlphaConcaveHull:
         # Access the (x, y) coordinates of the centroid
         centroid_x, centroid_y = centroid.x, centroid.y
 
-        print("Centroid coordinates (x, y):", centroid_x, centroid_y)
+        # print("Centroid coordinates (x, y):", centroid_x, centroid_y)
         n = len(x_edges)
         variance = 0
         for i in range(n):
@@ -104,9 +104,14 @@ class AlphaConcaveHull:
 
         variance = variance / n
 
-        print("Variance = " , str(variance))
+        # print("Variance = " , str(variance))
 
-        plt.scatter(self.fourier_x, self.fourier_y)
-        plt.plot(x_edges, y_edges, 'k-', label='Alpha Shape Edges')
-        plt.plot(hull_vertices[:, 0], hull_vertices[:, 1], 'r-', lw=2, label='Convex Hull')
+        # plt.scatter(self.fourier_x, self.fourier_y)
+        # plt.scatter(x_edges, y_edges)
+        # plt.plot(x_edges, y_edges, 'k-', label='Alpha Shape Edges')
+        # plt.plot(hull_vertices[:, 0], hull_vertices[:, 1], 'r-', lw=2, label='Convex Hull')
+
+        features = [area, perimeter, circularity, convexity, variance, bending_energy]
+        return features
+
 
