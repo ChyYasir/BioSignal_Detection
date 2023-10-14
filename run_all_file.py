@@ -1,5 +1,6 @@
 import numpy as np
 from main import SignalProcess
+import matplotlib.pyplot as plt
 class RunTermFiles:
     def __init__(self, n):
         self.n = n
@@ -38,5 +39,21 @@ class RunPretermFiles:
 # run_all_term_files = RunTermFiles(13)
 # run_all_term_files.makeFeatureArray()
 
-run_all_preterm_files = RunPretermFiles(13)
-run_all_preterm_files.makeFeatureArray()
+# run_all_preterm_files = RunPretermFiles(13)
+# run_all_preterm_files.makeFeatureArray()
+
+term_features = np.loadtxt("term_features.txt", delimiter="\t")
+areas_of_term = term_features[:, 4]
+preterm_features = np.loadtxt("preterm_features.txt", delimiter="\t")
+areas_of_preterm = preterm_features[:, 4]
+x_axis = [i for i in range(12)]
+
+plt.scatter(x_axis, areas_of_term, c='blue', marker='o', label='term')
+plt.scatter(x_axis, areas_of_preterm, c='red', marker='o', label='preterm')
+plt.title('Scatter Plot Example')
+plt.xlabel('X-axis')
+plt.ylabel('Y-axis')
+plt.legend()
+
+# Show the plot
+plt.show()
