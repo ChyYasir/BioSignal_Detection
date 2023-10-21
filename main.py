@@ -18,7 +18,7 @@ from math import sqrt
 class SignalProcess:
     def __init__(self, signal_name):
         self.signal_name = signal_name
-        self.path = 'D:/term-preterm-ehg-dataset-with-tocogram-1.0.0/' + self.signal_name
+        self.path = 'E:/term-preterm-ehg-database-1.0.1/tpehgdb/' + self.signal_name
         self.record = wfdb.rdrecord(self.path)
         self.signal_data = self.record.p_signal
         self.time = []
@@ -93,7 +93,7 @@ class SignalProcess:
         self.time = np.arange(0, self.signal_data.shape[0]) / fs
 
         # Choose the signal index you want to analyze
-        self.signal_index = 3  # Change this to the desired signal index
+        self.signal_index = 5  # Change this to the desired signal index
 
         # Define the sliding window width and step size
         window_width = 120  # in seconds
@@ -109,7 +109,7 @@ class SignalProcess:
         power_zero_crossing = []
 
         # Define the filter parameters
-        lowcut = 0.01667
+        lowcut = 0.08
 
         highcut = 3
 
@@ -153,11 +153,12 @@ class SignalProcess:
         N = int(40 * fs)
 
         self.rms_values = []
-
+        # print(fs)
         for i in range(0, len(self.modulated_signal)):
             j = i
             rms = 0.0
-            for j in range(0, 40 * fs):
+
+            for j in range(0, N):
                 if i + j >= len(self.modulated_signal):
                     break
                 rms = rms + (self.modulated_signal[i + j] * self.modulated_signal[i + j])
@@ -220,9 +221,10 @@ class SignalProcess:
 
         return features
 
-signal1 = SignalProcess("tpehgt_t008")
-signal1.process()
-signal1.show()
+# signal1 = SignalProcess("tpehg1756")
+# signal1.process()
+# signal1.show()
+# print(signal1.topological_features())
 # topologicalFeatures = signal1.topological_features()
 # print(topologicalFeatures)
 # basal_tone = mean of (10% of lowest values)

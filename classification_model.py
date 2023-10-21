@@ -14,6 +14,8 @@ preterm_features = np.loadtxt("preterm_features.txt", delimiter="\t")
 term_features_list = term_features.tolist()
 preterm_features_list = preterm_features.tolist()
 all_features = term_features_list
+print(term_features_list)
+
 
 for i in range(len(preterm_features_list)):
     all_features.append(preterm_features_list[i])
