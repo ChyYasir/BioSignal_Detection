@@ -6,20 +6,29 @@ import matplotlib.pyplot as plt
 class RunTermFiles:
     def __init__(self):
         self.n = 0
-    def makeFeatureArray(self, n):
-        features_2d_Array = []
-        self.n = n
-        for i in range(1, self.n+1, 1):
-            if i == 6:
-                continue
+    def makeFeatureArray(self):
+        term_features = np.loadtxt("term_features.txt", delimiter="\t")
+        term_features_list = term_features.tolist()
+        directory_path = "D:/term-preterm-ehg-dataset-with-tocogram-1.0.0/"
+        cnt = 0
+        self.n = 13
+        for i in range(1, self.n + 1, 1):
             formatted_number = str(i).zfill(3)
             signal_name = "tpehgt_t" + formatted_number
-            signal = SignalProcess(signal_name)
-            topologicalFeatures = signal.topological_features()
-            features_2d_Array.append(topologicalFeatures)
-        features_2d_Array = np.array(features_2d_Array)
-        print(features_2d_Array)
-        np.savetxt('term_features.txt', features_2d_Array, fmt='%f', delimiter='\t')
+            try:
+                signal = SignalProcess(signal_name, directory_path)
+                signal.process()
+                topologicalFeatures = signal.topological_features()
+                peakValue = signal.peak_value()
+                topologicalFeatures.append(peakValue)
+                term_features_list.append(topologicalFeatures)
+            except Exception as e:
+                print(f"Error processing {signal_name}: {str(e)}")
+                cnt = cnt + 1
+                print("Error Count : ", cnt)
+                continue
+
+        np.savetxt('term_features.txt', term_features_list, fmt='%f', delimiter='\t')
 
 
 
@@ -28,28 +37,41 @@ class RunTermFiles:
 class RunPretermFiles:
     def __init__(self):
         self.n = 0
-    def makeFeatureArray(self, n):
-        features_2d_Array = []
-        self.n = n
+    def makeFeatureArray(self):
+        preterm_features = np.loadtxt("preterm_features.txt", delimiter="\t")
+        preterm_features_list = preterm_features.tolist()
+        directory_path = "D:/term-preterm-ehg-dataset-with-tocogram-1.0.0/"
+        cnt = 0
+        self.n = 13
         for i in range(1, self.n+1, 1):
-            if i == 6:
-                continue
             formatted_number = str(i).zfill(3)
             signal_name = "tpehgt_p" + formatted_number
-            signal = SignalProcess(signal_name)
-            topologicalFeatures = signal.topological_features()
-            features_2d_Array.append(topologicalFeatures)
-        features_2d_Array = np.array(features_2d_Array)
-        print(features_2d_Array)
-        np.savetxt('preterm_features.txt', features_2d_Array, fmt='%f', delimiter='\t')
+            try:
+                signal = SignalProcess(signal_name, directory_path)
+                signal.process()
+                topologicalFeatures = signal.topological_features()
+                peakValue = signal.peak_value()
+                topologicalFeatures.append(peakValue)
+                preterm_features_list.append(topologicalFeatures)
+            except Exception as e:
+                print(f"Error processing {signal_name}: {str(e)}")
+                cnt = cnt + 1
+                print("Error Count : ", cnt)
+                continue
+
+
+
+        np.savetxt('preterm_features.txt', preterm_features_list, fmt='%f', delimiter='\t')
 
 
 class RunOldFiles:
     def makeFeatureArray(self):
-        term_features = np.loadtxt("term_features.txt", delimiter="\t")
-        preterm_features = np.loadtxt("preterm_features.txt", delimiter="\t")
-        term_features_list = term_features.tolist()
-        preterm_features_list = preterm_features.tolist()
+        # term_features = np.loadtxt("term_features.txt", delimiter="\t")
+        # preterm_features = np.loadtxt("preterm_features.txt", delimiter="\t")
+        # term_features_list = term_features.tolist()
+        # preterm_features_list = preterm_features.tolist()
+        term_features_list = []
+        preterm_features_list = []
         directory_path = "E:/term-preterm-ehg-database-1.0.1/tpehgdb/"
         # List all files in the directory
         files = os.listdir(directory_path)
@@ -82,35 +104,41 @@ class RunOldFiles:
                 print(file_name_without_extension + " : " + gestation)
 
                 try:
-                    signal = SignalProcess(file_name_without_extension)
+                    signal = SignalProcess(file_name_without_extension, directory_path)
                     signal.process()
+
                     topologicalFeatures = signal.topological_features()
+                    peakValue = signal.peak_value()
+                    topologicalFeatures.append(peakValue)
                     if float(gestation) >= 37:
+                        print("Term , Peak = "+ str(peakValue))
                         term_features_list.append(topologicalFeatures)
                     else:
+                        print("PreTerm , Peak = " + str(peakValue))
                         preterm_features_list.append(topologicalFeatures)
                 except Exception as e:
                     print(f"Error processing {file_name}: {str(e)}")
                     cnt = cnt + 1
+                    print("Error Count : ", cnt)
                     continue
 
 
         print("Total number of Errors: ", cnt)
-        # np.savetxt('term_features.txt', term_features_list, fmt='%f', delimiter='\t')
-        # np.savetxt('preterm_features.txt', preterm_features_list, fmt='%f', delimiter='\t')
+        np.savetxt('term_features.txt', term_features_list, fmt='%f', delimiter='\t')
+        np.savetxt('preterm_features.txt', preterm_features_list, fmt='%f', delimiter='\t')
 
 
 
 
 
-# run_all_term_files = RunTermFiles(13)
-# run_all_term_files.makeFeatureArray()
+run_all_term_files = RunTermFiles()
+run_all_term_files.makeFeatureArray()
 
-# run_all_preterm_files = RunPretermFiles(13)
+# run_all_preterm_files = RunPretermFiles()
 # run_all_preterm_files.makeFeatureArray()
 
-run_old_files = RunOldFiles()
-run_old_files.makeFeatureArray()
+# run_old_files = RunOldFiles()
+# run_old_files.makeFeatureArray()
 
 # areas_of_term = term_features[:, 4]
 

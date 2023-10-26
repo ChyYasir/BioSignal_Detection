@@ -16,9 +16,9 @@ from math import sqrt
 
 
 class SignalProcess:
-    def __init__(self, signal_name):
+    def __init__(self, signal_name, signal_path):
         self.signal_name = signal_name
-        self.path = 'E:/term-preterm-ehg-database-1.0.1/tpehgdb/' + self.signal_name
+        self.path = signal_path + self.signal_name
         self.record = wfdb.rdrecord(self.path)
         self.signal_data = self.record.p_signal
         self.time = []
@@ -93,7 +93,7 @@ class SignalProcess:
         self.time = np.arange(0, self.signal_data.shape[0]) / fs
 
         # Choose the signal index you want to analyze
-        self.signal_index = 5  # Change this to the desired signal index
+        self.signal_index = 3  # Change this to the desired signal index
 
         # Define the sliding window width and step size
         window_width = 120  # in seconds
@@ -121,6 +121,8 @@ class SignalProcess:
         order = 4
         b, a = butter(order, [low, high], btype='band')
 
+        # print(len(self.signal_data[:, 11]))
+        # print(self.signal_data[:, :])
         # Apply the filter to the signal
         for i in range(0, len(self.signal_data[:, self.signal_index])):
             self.signal_data[i, self.signal_index] = self.signal_data[i, self.signal_index]
@@ -191,6 +193,8 @@ class SignalProcess:
         l = -1
         r = -1
         self.contraction_array = []
+
+
         for i in range(0, len(self.rms_values)):
             self.contraction_array.append(self.threshold)
             if l == -1:
@@ -220,6 +224,12 @@ class SignalProcess:
         print("For " + self.signal_name + " = " + str(features))
 
         return features
+
+    def peak_value(self):
+        peak = max(self.contraction_array)
+        return peak
+
+
 
 # signal1 = SignalProcess("tpehg1756")
 # signal1.process()
