@@ -131,9 +131,9 @@ class RunOldFiles:
 
 
 
-run_all_term_files = RunTermFiles()
-run_all_term_files.makeFeatureArray()
-
+# run_all_term_files = RunTermFiles()
+# run_all_term_files.makeFeatureArray()
+#
 # run_all_preterm_files = RunPretermFiles()
 # run_all_preterm_files.makeFeatureArray()
 
