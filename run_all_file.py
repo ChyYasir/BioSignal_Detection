@@ -7,8 +7,9 @@ class RunTermFiles:
     def __init__(self):
         self.n = 0
     def makeFeatureArray(self):
-        term_features = np.loadtxt("term_features.txt", delimiter="\t")
-        term_features_list = term_features.tolist()
+        # term_features = np.loadtxt("term_features.txt", delimiter="\t")
+        # term_features_list = term_features.tolist()
+        term_features_list = []
         directory_path = "D:/term-preterm-ehg-dataset-with-tocogram-1.0.0/"
         cnt = 0
         self.n = 13
@@ -18,10 +19,14 @@ class RunTermFiles:
             try:
                 signal = SignalProcess(signal_name, directory_path)
                 signal.process()
-                topologicalFeatures = signal.topological_features()
-                peakValue = signal.peak_value()
-                topologicalFeatures.append(peakValue)
-                term_features_list.append(topologicalFeatures)
+                # topologicalFeatures = signal.topological_features()
+                allTopologicalFeatures = signal.all_segment_topological_features()
+                # peakValue = signal.peak_value()
+                # topologicalFeatures.append(peakValue)
+                for features in allTopologicalFeatures:
+                    print(features)
+                    term_features_list.append(features)
+                # term_features_list.append(topologicalFeatures)
             except Exception as e:
                 print(f"Error processing {signal_name}: {str(e)}")
                 cnt = cnt + 1
@@ -38,8 +43,9 @@ class RunPretermFiles:
     def __init__(self):
         self.n = 0
     def makeFeatureArray(self):
-        preterm_features = np.loadtxt("preterm_features.txt", delimiter="\t")
-        preterm_features_list = preterm_features.tolist()
+        # preterm_features = np.loadtxt("preterm_features.txt", delimiter="\t")
+        # preterm_features_list = preterm_features.tolist()
+        preterm_features_list = []
         directory_path = "D:/term-preterm-ehg-dataset-with-tocogram-1.0.0/"
         cnt = 0
         self.n = 13
@@ -49,10 +55,15 @@ class RunPretermFiles:
             try:
                 signal = SignalProcess(signal_name, directory_path)
                 signal.process()
-                topologicalFeatures = signal.topological_features()
-                peakValue = signal.peak_value()
-                topologicalFeatures.append(peakValue)
-                preterm_features_list.append(topologicalFeatures)
+                # topologicalFeatures = signal.topological_features()
+                # peakValue = signal.peak_value()
+                # topologicalFeatures.append(peakValue)
+                # preterm_features_list.append(topologicalFeatures)
+                allTopologicalFeatures = signal.all_segment_topological_features()
+
+                for features in allTopologicalFeatures:
+                    print(features)
+                    preterm_features_list.append(features)
             except Exception as e:
                 print(f"Error processing {signal_name}: {str(e)}")
                 cnt = cnt + 1
@@ -131,8 +142,8 @@ class RunOldFiles:
 
 
 
-# run_all_term_files = RunTermFiles()
-# run_all_term_files.makeFeatureArray()
+run_all_term_files = RunTermFiles()
+run_all_term_files.makeFeatureArray()
 #
 # run_all_preterm_files = RunPretermFiles()
 # run_all_preterm_files.makeFeatureArray()
@@ -140,17 +151,19 @@ class RunOldFiles:
 # run_old_files = RunOldFiles()
 # run_old_files.makeFeatureArray()
 
-# areas_of_term = term_features[:, 4]
-
-# areas_of_preterm = preterm_features[:, 4]
-# x_axis = [i for i in range(12)]
+# term_features = np.loadtxt("term_features.txt", delimiter="\t")
+# preterm_features = np.loadtxt("preterm_features.txt", delimiter="\t")
+# areas_of_term = term_features[:, 2]
 #
-# plt.scatter(x_axis, areas_of_term, c='blue', marker='o', label='term')
-# plt.scatter(x_axis, areas_of_preterm, c='red', marker='o', label='preterm')
+# areas_of_preterm = preterm_features[:, 2]
+# x_axis_term = [i for i in range(len(term_features))]
+# x_axis_preterm = [i for i in range(len(preterm_features))]
+# plt.scatter(x_axis_term, areas_of_term, c='blue', marker='o', label='term')
+# plt.scatter(x_axis_preterm, areas_of_preterm, c='red', marker='o', label='preterm')
 # plt.title('Scatter Plot Example')
 # plt.xlabel('X-axis')
 # plt.ylabel('Y-axis')
 # plt.legend()
-#
-# # Show the plot
-# plt.show()
+
+# Show the plot
+plt.show()

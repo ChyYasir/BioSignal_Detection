@@ -30,11 +30,13 @@ class SignalProcess:
         self.contraction_array = []
         self.signal_index = 0
         self.threshold = 0
+        self.contraction_segments = []
+        self.new_contraction_array = []
     def show(self):
         # plt.figure(1)
 
         fig1, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 12), sharex=True)
-        fig2, (ax4, ax5, ax6, ax7) = plt.subplots(4, 1, figsize=(10, 12), sharex=True)
+        fig2, (ax4, ax5, ax6, ax7, ax8) = plt.subplots(5, 1, figsize=(10, 12), sharex=True)
 
         # For the first window
         ax1.plot(self.time, self.signal_data[:, self.signal_index], label='Original Signal')
@@ -73,10 +75,15 @@ class SignalProcess:
 
         ax7.plot(self.time, self.contraction_array, label='RMS')
         ax7.set_ylabel('Amplitude')
-        ax7.set_xlabel('self.Time (seconds)')
+        # ax7.set_xlabel('self.Time (seconds)')
         ax7.set_title("Contraction")
         ax7.grid()
 
+        ax8.plot(self.time, self.new_contraction_array, label='New Contraction Array')
+        ax8.set_ylabel('Amplitude')
+        ax8.set_xlabel('self.Time (seconds)')
+        ax8.set_title("New Contraction")
+        ax8.grid()
         # You can choose to add more subplots as needed
 
         # Display the two windows
@@ -109,7 +116,7 @@ class SignalProcess:
         power_zero_crossing = []
 
         # Define the filter parameters
-        lowcut = 0.08
+        lowcut = 0.01667
 
         highcut = 3
 
@@ -187,15 +194,18 @@ class SignalProcess:
         #
         #
         # self.threshold = mean_value + h * std_deviation
-        # t = mean + h * std ;
+        # t = mean + h * std
+
         self.threshold = 1.2 * (mean + 0.25 * (signal_range))
 
         l = -1
         r = -1
         self.contraction_array = []
 
+        self.contraction_segments = []
 
         for i in range(0, len(self.rms_values)):
+            self.new_contraction_array.append(self.threshold)
             self.contraction_array.append(self.threshold)
             if l == -1:
                 if self.rms_values[i] >= self.threshold:
@@ -207,21 +217,45 @@ class SignalProcess:
                     r = i
                     duration = r - l + 1
                     duration = duration / fs
+                    segment = []
+                    peak_value = 0
+                    peak_idx = 0
                     if duration >= 30:
                         # print("l = " + str(l/fs) + " : r = " + str(r/fs))
                         for j in range(l, r + 1):
                             self.contraction_array[j] = self.rms_values[j]
+                            segment.append(self.rms_values[j])
+                            if self.rms_values[j] > peak_value:
+                                peak_value = self.rms_values[j]
+                                peak_idx = j
+                    new_contraction_segment = []
+                    if duration >= 30 and duration <= 100:
+                        for j in range(l, r+ 1):
+                            new_contraction_segment.append(self.rms_values[j])
+                            self.new_contraction_array[j] = self.rms_values[j]
+                        self.contraction_segments.append(new_contraction_segment)
+                    elif duration > 100:
+                        fifty = int(50 * fs)
+                        hundred = int(100 * fs)
+                        lft = max(l, peak_idx - fifty)
+                        rht = lft + hundred
+                        for j in range(lft, rht + 1):
+                            new_contraction_segment.append(self.rms_values[j])
+                            self.new_contraction_array[j] = self.rms_values[j]
+                        self.contraction_segments.append(new_contraction_segment)
+
                     l = -1
                     r = -1
+
         # plt.figure(2)
 
         # self.show()
 
     def topological_features(self):
-        concave_hull = AlphaConcaveHull(self.contraction_array, 5.0)
+        concave_hull = AlphaConcaveHull(self.contraction_segments[4], 1.785)
         features = concave_hull.execute()
 
-        print("For " + self.signal_name + " = " + str(features))
+        # print("For " + self.signal_name + " = " + str(features))
 
         return features
 
@@ -229,10 +263,26 @@ class SignalProcess:
         peak = max(self.contraction_array)
         return peak
 
+    def show_contractions(self):
+
+        for contraction in self.contraction_segments:
+            print(int(len(contraction)/self.record.fs))
+
+    def all_segment_topological_features(self):
+        result = []
+        for i in range(len(self.contraction_segments)):
+            concave_hull = AlphaConcaveHull(self.contraction_segments[i], 1.785)
+            features = concave_hull.execute()
+            result.append(features)
+
+        return result
 
 
-# signal1 = SignalProcess("tpehg1756")
+
+# signal1 = SignalProcess("tpehgt_p008", "D:/term-preterm-ehg-dataset-with-tocogram-1.0.0/")
 # signal1.process()
+# signal1.topological_features()
+# signal1.show_contractions()
 # signal1.show()
 # print(signal1.topological_features())
 # topologicalFeatures = signal1.topological_features()

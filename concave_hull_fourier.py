@@ -21,12 +21,19 @@ class AlphaConcaveHull:
     def execute(self):
         fourier = fft(self.signal)
 
-        self.fourier_x = [ele.real for ele in fourier]
-        self.fourier_y = [ele.imag for ele in fourier]
-
-        fourier_points = [[ele.real, ele.imag] for ele in fourier]
+        # self.fourier_x = [ele.real for ele in fourier]
+        # self.fourier_y = [ele.imag for ele in fourier]
+        #
+        # fourier_points = [[ele.real, ele.imag] for ele in fourier]
+        fourier_points = []
+        for i in range(len(fourier)):
+            if i == 0:
+                continue
+            self.fourier_x.append(fourier[i].real)
+            self.fourier_y.append(fourier[i].imag)
+            fourier_points.append([fourier[i].real, fourier[i].imag])
         arr_points = np.array(fourier_points)
-
+        # print(arr_points)
         # Create the alpha shape
         alpha_shape = alphashape.alphashape(arr_points, self.alpha)
 
@@ -109,8 +116,9 @@ class AlphaConcaveHull:
         # plt.scatter(self.fourier_x, self.fourier_y)
         # plt.scatter(x_edges, y_edges)
         # plt.plot(x_edges, y_edges, 'k-', label='Alpha Shape Edges')
-        # plt.plot(hull_vertices[:, 0], hull_vertices[:, 1], 'r-', lw=2, label='Convex Hull')
-
+        # # plt.plot(hull_vertices[:, 0], hull_vertices[:, 1], 'r-', lw=2, label='Convex Hull')
+        #
+        # plt.show()
         features = [area, perimeter, circularity, convexity, variance, bending_energy]
         return features
 
