@@ -77,12 +77,10 @@ class RunPretermFiles:
 
 class RunOldFiles:
     def makeFeatureArray(self):
-        # term_features = np.loadtxt("term_features.txt", delimiter="\t")
-        # preterm_features = np.loadtxt("preterm_features.txt", delimiter="\t")
-        # term_features_list = term_features.tolist()
-        # preterm_features_list = preterm_features.tolist()
-        term_features_list = []
-        preterm_features_list = []
+        term_features = np.loadtxt("term_features.txt", delimiter="\t")
+        preterm_features = np.loadtxt("preterm_features.txt", delimiter="\t")
+        term_features_list = term_features.tolist()
+        preterm_features_list = preterm_features.tolist()
         directory_path = "E:/term-preterm-ehg-database-1.0.1/tpehgdb/"
         # List all files in the directory
         files = os.listdir(directory_path)
@@ -118,15 +116,16 @@ class RunOldFiles:
                     signal = SignalProcess(file_name_without_extension, directory_path)
                     signal.process()
 
-                    topologicalFeatures = signal.topological_features()
-                    peakValue = signal.peak_value()
-                    topologicalFeatures.append(peakValue)
-                    if float(gestation) >= 37:
-                        print("Term , Peak = "+ str(peakValue))
-                        term_features_list.append(topologicalFeatures)
-                    else:
-                        print("PreTerm , Peak = " + str(peakValue))
-                        preterm_features_list.append(topologicalFeatures)
+                    # topologicalFeatures = signal.topological_features()
+                    # peakValue = signal.peak_value()
+                    # topologicalFeatures.append(peakValue)
+                    allTopologicalFeatures = signal.all_segment_topological_features()
+                    for features in allTopologicalFeatures:
+                        print(features)
+                        if float(gestation) >= 37:
+                            term_features_list.append(features)
+                        else:
+                            preterm_features_list.append(features)
                 except Exception as e:
                     print(f"Error processing {file_name}: {str(e)}")
                     cnt = cnt + 1
@@ -142,14 +141,14 @@ class RunOldFiles:
 
 
 
-run_all_term_files = RunTermFiles()
-run_all_term_files.makeFeatureArray()
+# run_all_term_files = RunTermFiles()
+# run_all_term_files.makeFeatureArray()
 #
 # run_all_preterm_files = RunPretermFiles()
 # run_all_preterm_files.makeFeatureArray()
 
-# run_old_files = RunOldFiles()
-# run_old_files.makeFeatureArray()
+run_old_files = RunOldFiles()
+run_old_files.makeFeatureArray()
 
 # term_features = np.loadtxt("term_features.txt", delimiter="\t")
 # preterm_features = np.loadtxt("preterm_features.txt", delimiter="\t")
