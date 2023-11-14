@@ -10,7 +10,7 @@ import alphashape
 from shapely.geometry import Point
 import pywt
 from concave_hull_fourier import AlphaConcaveHull
-
+from new_features_extraction import NewFeaturesExtract
 # Import the interpolation function
 from math import sqrt
 
@@ -246,7 +246,7 @@ class SignalProcess:
 
                     l = -1
                     r = -1
-
+        # print(len(self.contraction_array))
         # plt.figure(2)
 
         # self.show()
@@ -277,12 +277,20 @@ class SignalProcess:
 
         return result
 
+    def get_new_features(self):
+        new_features = NewFeaturesExtract(self.contraction_segments[0], self.record.fs)
+        features = new_features.getFeatures()
+        return features
 
 
-# signal1 = SignalProcess("tpehgt_p008", "D:/term-preterm-ehg-dataset-with-tocogram-1.0.0/")
 
-# signal1.process()
 
+signal1 = SignalProcess("tpehgt_p008", "D:/term-preterm-ehg-dataset-with-tocogram-1.0.0/")
+
+
+signal1.process()
+
+print(signal1.get_new_features())
 # signal1.topological_features()
 # signal1.show_contractions()
 # signal1.show()
