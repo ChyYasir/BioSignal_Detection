@@ -80,10 +80,12 @@ class NewFeaturesExtract:
         rms = np.sqrt(np.mean(signal ** 2))
         crest_factor = peak_amplitude / rms
 
-        #For Mean Frequency
+        # For Mean Frequency
         signal = np.array(self.signal)
+
         # Perform a spectral analysis using Welch's method to obtain the power spectrum
         frequencies, power_spectrum = welch(signal, fs=self.sampling_frequency)
+
 
         mean_frequency = np.sum(frequencies * power_spectrum) / np.sum(power_spectrum)
 
