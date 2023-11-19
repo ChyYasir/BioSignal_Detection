@@ -71,8 +71,8 @@ class RunPretermFiles:
 
 class RunOldFiles:
     def makeFeatureArray(self):
-        term_features = np.loadtxt("term_features.txt", delimiter="\t")
-        preterm_features = np.loadtxt("preterm_features.txt", delimiter="\t")
+        term_features = np.loadtxt("new_term_features.txt", delimiter="\t")
+        preterm_features = np.loadtxt("new_preterm_features.txt", delimiter="\t")
         term_features_list = term_features.tolist()
         preterm_features_list = preterm_features.tolist()
         directory_path = "E:/term-preterm-ehg-database-1.0.1/tpehgdb/"
@@ -138,11 +138,11 @@ class RunOldFiles:
 # run_all_term_files = RunTermFiles()
 # run_all_term_files.makeFeatureArray()
 
-run_all_preterm_files = RunPretermFiles()
-run_all_preterm_files.makeFeatureArray()
+# run_all_preterm_files = RunPretermFiles()
+# run_all_preterm_files.makeFeatureArray()
 
-# run_old_files = RunOldFiles()
-# run_old_files.makeFeatureArray()
+run_old_files = RunOldFiles()
+run_old_files.makeFeatureArray()
 
 # term_features = np.loadtxt("term_features.txt", delimiter="\t")
 # preterm_features = np.loadtxt("preterm_features.txt", delimiter="\t")
