@@ -295,8 +295,8 @@ class SignalProcess:
 
 
 # signal1 = SignalProcess("tpehgt_p008", "D:/term-preterm-ehg-dataset-with-tocogram-1.0.0/")
-#
-#
+
+
 # signal1.process()
 #
 # print(signal1.get_new_features())
