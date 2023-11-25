@@ -1,7 +1,9 @@
 import numpy as np
+from EntropyHub import BubbEn, ApEn, DispEn
 from scipy.signal import welch
 import matplotlib.pyplot as plt
 
+import EntropyHub as EH
 class NewFeaturesExtract:
     def __init__(self, signal, sampling_frequency):
         self.signal = signal
@@ -70,6 +72,17 @@ class NewFeaturesExtract:
 
         return samp_en
 
+    def count_peaks(self,signal):
+        positive_peaks = 0
+        negative_peaks = 0
+
+        for i in range(1, len(signal) - 1):
+            if signal[i - 1] < signal[i] > signal[i + 1]:
+                positive_peaks += 1
+            elif signal[i - 1] > signal[i] < signal[i + 1]:
+                negative_peaks += 1
+
+        return positive_peaks, negative_peaks
     def getFeatures(self):
         #For Energy
         energy = sum(x ** 2 for x in self.signal)
@@ -112,8 +125,31 @@ class NewFeaturesExtract:
         #For Sample Entropy
         m = 2
         r = 0.2
-
         sample_entropy = self.sample_entropy(signal, m, r)
 
-        #For Time Revers
-        return [energy, crest_factor, mean_frequency, median_frequency, peak_to_peak_amplitude, shannon_entropy, sample_entropy]
+        # For Approximate Entropy
+        Approximate_entropy, Phi = ApEn(signal,m=2)
+
+        # For Dispersion Entropy
+        Dispersion_entropy, Ppi = DispEn(signal, m=2, c=7)
+
+        # For Contraction Intensity
+        positive_peaks, negative_peaks = self.count_peaks(signal)
+        duration = N / self.sampling_frequency
+        contraction_intensity = ((positive_peaks + negative_peaks)*40)/(2 * duration)
+
+        # For Contraction Power
+        f_low = 0.01667
+        f_high = 3
+
+        # Find the indices corresponding to the frequency band
+        H = np.argmax(frequencies >= f_high)
+        L = np.argmax(frequencies >= f_low)
+
+        # Ensure the indices are within the valid range
+        H = min(H, len(power_spectrum) - 1)
+        L = min(L, len(power_spectrum) - 1)
+
+        contraction_power = np.sum(power_spectrum[L:H + 1] * (self.sampling_frequency / N))
+
+        return [energy, crest_factor, mean_frequency, median_frequency, peak_to_peak_amplitude, contraction_intensity, contraction_power, shannon_entropy, sample_entropy, Approximate_entropy, Dispersion_entropy]

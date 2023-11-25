@@ -252,7 +252,7 @@ class SignalProcess:
         # self.show()
 
     def topological_features(self):
-        concave_hull = AlphaConcaveHull(self.contraction_segments[4], 1.785)
+        concave_hull = AlphaConcaveHull(self.contraction_segments[0], 1.785)
         features = concave_hull.execute()
 
         # print("For " + self.signal_name + " = " + str(features))
@@ -294,9 +294,9 @@ class SignalProcess:
 
 
 
-# signal1 = SignalProcess("tpehgt_p008", "D:/term-preterm-ehg-dataset-with-tocogram-1.0.0/")
-
-
+# signal1 = SignalProcess("tpehgt_t001", "D:/term-preterm-ehg-dataset-with-tocogram-1.0.0/")
+#
+#
 # signal1.process()
 #
 # print(signal1.get_new_features())
