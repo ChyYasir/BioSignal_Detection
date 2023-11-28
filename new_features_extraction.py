@@ -152,4 +152,15 @@ class NewFeaturesExtract:
 
         contraction_power = np.sum(power_spectrum[L:H + 1] * (self.sampling_frequency / N))
 
-        return [energy, crest_factor, mean_frequency, median_frequency, peak_to_peak_amplitude, contraction_intensity, contraction_power, shannon_entropy, sample_entropy, Approximate_entropy, Dispersion_entropy]
+
+        #For variance
+
+        variance = 0
+
+        for i in signal:
+            variance = variance + (i * i)
+
+        variance = variance * (1 / (N-1))
+
+        log_detector = np.exp(np.sum(np.log(signal))/N)
+        return [energy, crest_factor, mean_frequency, median_frequency, peak_to_peak_amplitude, contraction_intensity, contraction_power, shannon_entropy, sample_entropy,Dispersion_entropy , variance, log_detector]
