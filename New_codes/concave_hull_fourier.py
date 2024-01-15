@@ -5,7 +5,7 @@ from scipy.spatial import ConvexHull
 from shapely.geometry import Polygon
 import alphashape
 import math
-
+import cv2
 class AlphaConcaveHull:
     def __init__(self, signal, alpha):
         self.signal = signal
@@ -133,16 +133,26 @@ class AlphaConcaveHull:
             x_edges_convex.append(vertex[0])
             y_edges_convex.append(vertex[1])
 
-        # plt.plot(x_edges_convex, y_edges_convex, 'r-', label='Convex Hull')
+        plt.plot(x_edges_convex, y_edges_convex, 'r-', label='Convex Hull')
 
+        # Compute the minimum bounding rectangle
+        rect = cv2.minAreaRect(np.array(hull_vertices, dtype=np.float32))
 
-        # # plt.scatter(self.fourier_x, self.fourier_y)
-        # # plt.scatter(x_edges, y_edges)
-        # # plt.plot(x_edges, y_edges, 'k-', label='Alpha Shape Edges')
-        # plt.plot(hull_vertices[:, 0], hull_vertices[:, 1], 'r-', lw=2,  label='Convex Hull')
-        # plt.legend()
-        # plt.show()
-        # print(2)
+        print(rect)
+        # Get the rectangle's parameters
+        rect_center, rect_size, rect_angle = rect
+
+        # Draw the minimum bounding rectangle
+        box = cv2.boxPoints(rect)
+        box = np.append(box, [box[0]], axis=0)
+
+        # box = np.int0(box)
+        plt.plot(box[:, 0], box[:, 1], 'g-', label='Bounding Rectangle')
+
+        # ... (rest of your code)
+
+        plt.legend()
+        plt.show()
         features = self.features(x_edges_convex, y_edges_convex)
 
         return features

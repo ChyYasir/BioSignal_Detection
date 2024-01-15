@@ -83,7 +83,7 @@ class SignalProcess:
         # self.show(fs, normal_signal, filtered_signal, med_filtered_signal)
         self.concave_signal = copy.copy(med_filtered_signal)
 
-        # print(self.topological_features())
+        print(self.topological_features())
     def topological_features(self):
         concave_hull = AlphaConcaveHull(self.concave_signal, 1.785)
         features = concave_hull.execute()
@@ -92,8 +92,8 @@ class SignalProcess:
 
 
 # print(1)
-# early_cesarean = SignalProcess("icehg666","F:/signal/dataset/early_cesarean/")
+early_cesarean = SignalProcess("icehg666","F:/signal/dataset/early_cesarean/")
 #
-# early_cesarean.process();
+early_cesarean.process();
 
 
