@@ -104,48 +104,49 @@ class AlphaConcaveHull:
         eccentricity = longer_side / shorter_side if shorter_side != 0 else 0
         return [area, perimeter, circularity, convexity, variance, bending_energy, rectangularity, eccentricity]
         # print("Variance = " , str(variance))
+
     def execute(self):
         fourier = fft(self.signal)
         fourier_points = [(point.real, point.imag) for point in fourier[1:]]
         self.fourier_x, self.fourier_y = zip(*fourier_points)
-        arr_points = np.array(fourier_points)
-        # print(fourier_points)
 
+        # Concave Hull calculation
         ch = ConcaveHull()
         ch.loadpoints(fourier_points)
         ch.calculatehull(tol=10)
         ch.polygon()
-
-        # boundary_points = np.vstack(ch.boundary.exterior.coords.xy).T
         boundary_points = np.array(ch.boundary.exterior.coords)
         boundary_x, boundary_y = boundary_points[:, 0], boundary_points[:, 1]
-        # alpha = 0.95 * alphashape.optimizealpha(fourier_points)
-        # concave_hull = alphashape.alphashape(arr_points, alpha)
-        # concave_hull_pts = concave_hull.exterior.coords.xy
 
+        # Compute the minimum bounding rectangle for concave hull
+        concave_rect = cv2.minAreaRect(boundary_points.astype(np.float32))
+        concave_box = cv2.boxPoints(concave_rect)
+        concave_box = np.append(concave_box, [concave_box[0]], axis=0)  # Closing the loop for plotting
 
+        # Convex Hull calculation
         hull_vertices = self.graham_scan(fourier_points)
         hull_vertices.append(hull_vertices[0])  # Closing the loop of the convex hull for plotting
+
+        # Compute the minimum bounding rectangle for convex hull
+        convex_rect = cv2.minAreaRect(np.array(hull_vertices, dtype=np.float32))
+        convex_box = cv2.boxPoints(convex_rect)
+        convex_box = np.append(convex_box, [convex_box[0]], axis=0)  # Closing the loop for plotting
 
         # Plotting
         fig, axs = plt.subplots(1, 2, figsize=(12, 6))
 
-        # Plot for Concave Hull
-        axs[0].scatter(self.fourier_x, self.fourier_y)
+        # Plot for Concave Hull with its bounding rectangle
+        axs[0].scatter(self.fourier_x, self.fourier_y, label='Fourier Points')
         axs[0].plot(boundary_x, boundary_y, 'b-', label='Concave Hull')
-        axs[0].set_title('Concave Hull')
+        axs[0].plot(concave_box[:, 0], concave_box[:, 1], 'g-', label='Bounding Rectangle (Concave Hull)')
+        axs[0].set_title('Concave Hull with Bounding Rectangle')
 
-        # Plot for Convex Hull
+        # Plot for Convex Hull with its bounding rectangle
         x_edges_convex, y_edges_convex = zip(*hull_vertices)
         axs[1].scatter(self.fourier_x, self.fourier_y, label='Fourier Points')
         axs[1].plot(x_edges_convex, y_edges_convex, 'r-', label='Convex Hull')
-        axs[1].set_title('Convex Hull')
-
-        # Compute and draw the minimum bounding rectangle for convex hull
-        rect = cv2.minAreaRect(np.array(hull_vertices, dtype=np.float32))
-        box = cv2.boxPoints(rect)
-        box = np.append(box, [box[0]], axis=0)
-        axs[1].plot(box[:, 0], box[:, 1], 'g-', label='Bounding Rectangle')
+        axs[1].plot(convex_box[:, 0], convex_box[:, 1], 'g-', label='Bounding Rectangle (Convex Hull)')
+        axs[1].set_title('Convex Hull with Bounding Rectangle')
 
         for ax in axs:
             ax.legend()
@@ -153,7 +154,8 @@ class AlphaConcaveHull:
 
         plt.show()
 
-        features = self.features(x_edges_convex, y_edges_convex, rect)
+        # Features calculation for convex hull
+        features = self.features(boundary_x, boundary_y, concave_rect)
 
         return features
 
