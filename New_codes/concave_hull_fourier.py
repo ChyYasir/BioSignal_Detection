@@ -6,6 +6,7 @@ from shapely.geometry import Polygon
 import alphashape
 import math
 import cv2
+from Concave_Hull import ConcaveHull
 class AlphaConcaveHull:
     def __init__(self, signal, alpha):
         self.signal = signal
@@ -37,7 +38,7 @@ class AlphaConcaveHull:
             hull.append(p)
         return hull
 
-    def features(self, x_edges, y_edges):
+    def features(self, x_edges, y_edges, rect):
         area = 0
         perimeter = 0
         n = len(x_edges)
@@ -91,69 +92,68 @@ class AlphaConcaveHull:
             variance = variance + (centroid_to_current * centroid_to_current)
 
         variance = variance / n
-        return [area, perimeter, circularity, convexity, variance, bending_energy]
+
+        rect_width, rect_height = rect[1]
+        rect_area = rect_width * rect_height
+        # Rectangularity
+        rectangularity = area / rect_area if rect_area != 0 else 0
+
+        # Eccentricity
+        longer_side = max(rect_width, rect_height)
+        shorter_side = min(rect_width, rect_height)
+        eccentricity = longer_side / shorter_side if shorter_side != 0 else 0
+        return [area, perimeter, circularity, convexity, variance, bending_energy, rectangularity, eccentricity]
         # print("Variance = " , str(variance))
     def execute(self):
         fourier = fft(self.signal)
-
-        # self.fourier_x = [ele.real for ele in fourier]
-        # self.fourier_y = [ele.imag for ele in fourier]
-        #
-        # fourier_points = [[ele.real, ele.imag] for ele in fourier]
-        fourier_points = []
-        for i in range(len(fourier)):
-            if i == 0:
-                continue
-            self.fourier_x.append(fourier[i].real)
-            self.fourier_y.append(fourier[i].imag)
-            fourier_points.append([fourier[i].real, fourier[i].imag])
+        fourier_points = [(point.real, point.imag) for point in fourier[1:]]
+        self.fourier_x, self.fourier_y = zip(*fourier_points)
         arr_points = np.array(fourier_points)
+        # print(fourier_points)
 
-        plt.scatter(self.fourier_x, self.fourier_y)
-        # plt.show()
-        # print(arr_points)
-        # Create the alpha shape
-        alpha_shape = alphashape.alphashape(arr_points, self.alpha)
-        #
-        # Extract the edges (LineString) of the alpha shape
-        edges = alpha_shape.boundary
-        #
-        # # # Extract the x and y coordinates of the edges
-        # x_edges, y_edges = edges.xy
-        #
-        # Create a ConvexHull object from the points
+        ch = ConcaveHull()
+        ch.loadpoints(fourier_points)
+        ch.calculatehull(tol=10)
+        ch.polygon()
+
+        # boundary_points = np.vstack(ch.boundary.exterior.coords.xy).T
+        boundary_points = np.array(ch.boundary.exterior.coords)
+        boundary_x, boundary_y = boundary_points[:, 0], boundary_points[:, 1]
+        # alpha = 0.95 * alphashape.optimizealpha(fourier_points)
+        # concave_hull = alphashape.alphashape(arr_points, alpha)
+        # concave_hull_pts = concave_hull.exterior.coords.xy
+
+
         hull_vertices = self.graham_scan(fourier_points)
+        hull_vertices.append(hull_vertices[0])  # Closing the loop of the convex hull for plotting
 
-        # Closing the loop of the convex hull for plotting
-        hull_vertices.append(hull_vertices[0])
+        # Plotting
+        fig, axs = plt.subplots(1, 2, figsize=(12, 6))
 
-        # Plot the convex hull
-        x_edges_convex, y_edges_convex = [], []
-        for vertex in hull_vertices:
-            x_edges_convex.append(vertex[0])
-            y_edges_convex.append(vertex[1])
+        # Plot for Concave Hull
+        axs[0].scatter(self.fourier_x, self.fourier_y)
+        axs[0].plot(boundary_x, boundary_y, 'b-', label='Concave Hull')
+        axs[0].set_title('Concave Hull')
 
-        plt.plot(x_edges_convex, y_edges_convex, 'r-', label='Convex Hull')
+        # Plot for Convex Hull
+        x_edges_convex, y_edges_convex = zip(*hull_vertices)
+        axs[1].scatter(self.fourier_x, self.fourier_y, label='Fourier Points')
+        axs[1].plot(x_edges_convex, y_edges_convex, 'r-', label='Convex Hull')
+        axs[1].set_title('Convex Hull')
 
-        # Compute the minimum bounding rectangle
+        # Compute and draw the minimum bounding rectangle for convex hull
         rect = cv2.minAreaRect(np.array(hull_vertices, dtype=np.float32))
-
-        print(rect)
-        # Get the rectangle's parameters
-        rect_center, rect_size, rect_angle = rect
-
-        # Draw the minimum bounding rectangle
         box = cv2.boxPoints(rect)
         box = np.append(box, [box[0]], axis=0)
+        axs[1].plot(box[:, 0], box[:, 1], 'g-', label='Bounding Rectangle')
 
-        # box = np.int0(box)
-        plt.plot(box[:, 0], box[:, 1], 'g-', label='Bounding Rectangle')
+        for ax in axs:
+            ax.legend()
+            ax.axis('equal')
 
-        # ... (rest of your code)
-
-        plt.legend()
         plt.show()
-        features = self.features(x_edges_convex, y_edges_convex)
+
+        features = self.features(x_edges_convex, y_edges_convex, rect)
 
         return features
 
