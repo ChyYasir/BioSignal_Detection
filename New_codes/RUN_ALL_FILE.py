@@ -42,8 +42,14 @@ class RunFiles:
                 try:
                     signal = SignalProcess(file_name_without_extension, directory_path)
                     signal.process()
-                    features = signal.topological_features()
-                    features_list.append(features)
+                    # features = signal.topological_features()
+                    # features_list.append(features)
+
+                    allNewFeatures = signal.all_segment_topological_features()
+
+                    for features in allNewFeatures:
+                        print(features)
+                        features_list.append(features)
                 except Exception as e:
                     print(f"Error processing {file_name}: {str(e)}")
                     cnt = cnt + 1

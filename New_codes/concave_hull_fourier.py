@@ -113,7 +113,7 @@ class AlphaConcaveHull:
         # Concave Hull calculation
         ch = ConcaveHull()
         ch.loadpoints(fourier_points)
-        ch.calculatehull(tol=10)
+        ch.calculatehull(tol=1)
         ch.polygon()
         boundary_points = np.array(ch.boundary.exterior.coords)
         boundary_x, boundary_y = boundary_points[:, 0], boundary_points[:, 1]
@@ -133,26 +133,26 @@ class AlphaConcaveHull:
         convex_box = np.append(convex_box, [convex_box[0]], axis=0)  # Closing the loop for plotting
 
         # Plotting
-        fig, axs = plt.subplots(1, 2, figsize=(12, 6))
-
-        # Plot for Concave Hull with its bounding rectangle
-        axs[0].scatter(self.fourier_x, self.fourier_y, label='Fourier Points')
-        axs[0].plot(boundary_x, boundary_y, 'b-', label='Concave Hull')
-        axs[0].plot(concave_box[:, 0], concave_box[:, 1], 'g-', label='Bounding Rectangle (Concave Hull)')
-        axs[0].set_title('Concave Hull with Bounding Rectangle')
-
-        # Plot for Convex Hull with its bounding rectangle
-        x_edges_convex, y_edges_convex = zip(*hull_vertices)
-        axs[1].scatter(self.fourier_x, self.fourier_y, label='Fourier Points')
-        axs[1].plot(x_edges_convex, y_edges_convex, 'r-', label='Convex Hull')
-        axs[1].plot(convex_box[:, 0], convex_box[:, 1], 'g-', label='Bounding Rectangle (Convex Hull)')
-        axs[1].set_title('Convex Hull with Bounding Rectangle')
-
-        for ax in axs:
-            ax.legend()
-            ax.axis('equal')
-
-        plt.show()
+        # fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+        #
+        # # Plot for Concave Hull with its bounding rectangle
+        # axs[0].scatter(self.fourier_x, self.fourier_y, label='Fourier Points')
+        # axs[0].plot(boundary_x, boundary_y, 'b-', label='Concave Hull')
+        # axs[0].plot(concave_box[:, 0], concave_box[:, 1], 'g-', label='Bounding Rectangle (Concave Hull)')
+        # axs[0].set_title('Concave Hull with Bounding Rectangle')
+        #
+        # # Plot for Convex Hull with its bounding rectangle
+        # x_edges_convex, y_edges_convex = zip(*hull_vertices)
+        # axs[1].scatter(self.fourier_x, self.fourier_y, label='Fourier Points')
+        # axs[1].plot(x_edges_convex, y_edges_convex, 'r-', label='Convex Hull')
+        # axs[1].plot(convex_box[:, 0], convex_box[:, 1], 'g-', label='Bounding Rectangle (Convex Hull)')
+        # axs[1].set_title('Convex Hull with Bounding Rectangle')
+        #
+        # for ax in axs:
+        #     ax.legend()
+        #     ax.axis('equal')
+        #
+        # plt.show()
 
         # Features calculation for convex hull
         features = self.features(boundary_x, boundary_y, concave_rect)

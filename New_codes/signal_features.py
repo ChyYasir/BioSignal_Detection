@@ -2,10 +2,13 @@ import wfdb
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
+
+from scipy.interpolate import interp1d
 from scipy.signal import butter, filtfilt, medfilt
+from sklearn import preprocessing
 
 from New_codes.concave_hull_fourier import AlphaConcaveHull
-
+from math import sqrt
 
 class SignalProcess:
     def __init__(self, signal_name, signal_path):
@@ -83,17 +86,149 @@ class SignalProcess:
         # self.show(fs, normal_signal, filtered_signal, med_filtered_signal)
         self.concave_signal = copy.copy(med_filtered_signal)
 
-        print(self.topological_features())
+        window_width = 120  # in seconds
+        step_size = 1  # in seconds
+
+        # Calculate the number of samples in each window
+        window_size = int(window_width * fs)
+        step_size_samples = int(step_size * fs)
+
+        # Calculate zero crossing rate for each segment
+        self.zero_crossing_rates = []
+        self.timestamps = []
+        power_zero_crossing = []
+        for i in range(0, self.signal_data.shape[0] - window_size + 1, step_size_samples):
+            # segment = self.signal_data[i:i + window_size, self.signal_index]
+            segment = med_filtered_signal[i: i + window_size]
+            zero_crossings = np.where(np.diff(np.sign(segment)))[0]
+            zero_crossing_rate = len(zero_crossings) / window_width
+            self.zero_crossing_rates.append(zero_crossing_rate)
+            power_zero_crossing.append(pow(zero_crossing_rate, 1.2))
+            self.timestamps.append(self.time[i])
+
+        # Normalize the power of zero crossing rates
+        normalized_power = preprocessing.normalize([power_zero_crossing])[0]
+
+        # Interpolate the normalized power to match the length of the signal
+        interpolator = interp1d(np.array(self.timestamps), normalized_power, kind='linear', fill_value="extrapolate")
+        self.interpolated_normalized_power = interpolator(self.time)
+
+
+        # Modulate the original signal with the interpolated normalized power
+        self.modulated_signal = self.signal_data[:, self.signal_index] * self.interpolated_normalized_power
+
+        N = int(40 * fs)
+
+        self.rms_values = []
+        # print(fs)
+        for i in range(0, len(self.modulated_signal)):
+            j = i
+            rms = 0.0
+
+            for j in range(0, N):
+                if i + j >= len(self.modulated_signal):
+                    break
+                rms = rms + (self.modulated_signal[i + j] * self.modulated_signal[i + j])
+
+            rms = rms / N
+            rms = sqrt(rms)
+            self.rms_values.append(rms)
+
+        tmp_rms = self.rms_values
+        sorted_rms = sorted(tmp_rms)
+
+        signal_range = sorted_rms[len(sorted_rms) - 1] - sorted_rms[0]
+        length = len(sorted_rms) // 10
+
+        mean = 0
+        for i in range(0, length):
+            mean = mean + sorted_rms[i]
+
+
+        mean = mean / length
+
+        # mean_value = np.mean(self.modulated_signal)
+        # std_deviation = np.std(self.modulated_signal)
+        # h = 2
+        #
+        #
+        # self.threshold = mean_value + h * std_deviation
+        # t = mean + h * std
+
+        self.threshold = 1.2 * (mean + 0.25 * (signal_range))
+
+        l = -1
+        r = -1
+        self.contraction_array = []
+
+        self.contraction_segments = []
+
+        for i in range(0, len(self.rms_values)):
+            self.new_contraction_array.append(self.threshold)
+            self.contraction_array.append(self.threshold)
+            if l == -1:
+                if self.rms_values[i] >= self.threshold:
+                    l = i
+                    continue
+
+            if l != -1 and r == -1:
+                if self.rms_values[i] <= self.threshold:
+                    r = i
+                    duration = r - l + 1
+                    duration = duration / fs
+                    segment = []
+                    peak_value = 0
+                    peak_idx = 0
+                    if duration >= 30:
+                        # print("l = " + str(l/fs) + " : r = " + str(r/fs))
+                        for j in range(l, r + 1):
+                            self.contraction_array[j] = self.rms_values[j]
+                            segment.append(self.rms_values[j])
+                            if self.rms_values[j] > peak_value:
+                                peak_value = self.rms_values[j]
+                                peak_idx = j
+                    new_contraction_segment = []
+                    if duration >= 30 and duration <= 100:
+                        for j in range(l, r+ 1):
+                            new_contraction_segment.append(self.rms_values[j])
+                            self.new_contraction_array[j] = self.rms_values[j]
+                        self.contraction_segments.append(new_contraction_segment)
+                    elif duration > 100:
+                        fifty = int(50 * fs)
+                        hundred = int(100 * fs)
+                        lft = max(l, peak_idx - fifty)
+                        rht = lft + hundred
+                        for j in range(lft, rht + 1):
+                            new_contraction_segment.append(self.rms_values[j])
+                            self.new_contraction_array[j] = self.rms_values[j]
+                        self.contraction_segments.append(new_contraction_segment)
+
+                    l = -1
+                    r = -1
+
+
+        # print(self.topological_features())
     def topological_features(self):
         concave_hull = AlphaConcaveHull(self.concave_signal, 1.785)
         features = concave_hull.execute()
         return features
 
+    def all_segment_topological_features(self):
+        result = []
+        for i in range(len(self.contraction_segments)):
+            concave_hull = AlphaConcaveHull(self.contraction_segments[i], 1.785)
+            features = concave_hull.execute()
+            result.append(features)
+
+        return result
+
+
+
 
 
 # print(1)
-early_cesarean = SignalProcess("icehg666","F:/signal/dataset/early_cesarean/")
-#
-early_cesarean.process();
+# early_cesarean = SignalProcess("icehg666","F:/signal/dataset/early_cesarean/")
+# #
+# early_cesarean.process();
 
 
