@@ -156,6 +156,7 @@ class SignalProcess:
         interpolator = interp1d(np.array(self.timestamps), normalized_power, kind='linear', fill_value="extrapolate")
         self.interpolated_normalized_power = interpolator(self.time)
 
+
         # Modulate the original signal with the interpolated normalized power
         self.modulated_signal = self.signal_data[:, self.signal_index] * self.interpolated_normalized_power
 
@@ -185,6 +186,7 @@ class SignalProcess:
         mean = 0
         for i in range(0, length):
             mean = mean + sorted_rms[i]
+
 
         mean = mean / length
 

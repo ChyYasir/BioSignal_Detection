@@ -3,19 +3,33 @@ import numpy as np
 from main import SignalProcess
 
 import matplotlib.pyplot as plt
+import csv
+def save_to_csv(file_path, data):
+    with open(file_path, 'w', newline='') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerows(data)
+
+def add_to_csv(file_path, new_data):
+    with open(file_path, 'a', newline='') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerows(new_data)
+
 class RunTermFiles:
     def __init__(self):
         self.n = 0
     def makeFeatureArray(self):
         # term_features = np.loadtxt("term_features.txt", delimiter="\t")
         # term_features_list = term_features.tolist()
+        print(1)
         term_features_list = []
+
         directory_path = "D:/term-preterm-ehg-dataset-with-tocogram-1.0.0/"
         cnt = 0
         self.n = 13
         for i in range(1, self.n + 1, 1):
             formatted_number = str(i).zfill(3)
             signal_name = "tpehgt_t" + formatted_number
+            print("signal name: ", signal_name)
             try:
                 signal = SignalProcess(signal_name, directory_path)
                 signal.process()
@@ -33,7 +47,7 @@ class RunTermFiles:
                 print("Error Count : ", cnt)
                 continue
 
-        np.savetxt('term_features.txt', term_features_list, fmt='%f', delimiter='\t')
+        save_to_csv("term_features.csv", term_features_list)
 
 
 
@@ -72,16 +86,14 @@ class RunPretermFiles:
 
 
 
-        np.savetxt('preterm_features.txt', preterm_features_list, fmt='%f', delimiter='\t')
+        save_to_csv("preterm_features.csv", preterm_features_list)
 
 
 class RunOldFiles:
     def makeFeatureArray(self):
-        term_features = np.loadtxt("term_features.txt", delimiter="\t")
-        preterm_features = np.loadtxt("preterm_features.txt", delimiter="\t")
-        term_features_list = term_features.tolist()
-        preterm_features_list = preterm_features.tolist()
-        directory_path = "E:/term-preterm-ehg-database-1.0.1/tpehgdb/"
+        term_features_list = []
+        preterm_features_list = []
+        directory_path = "F:/signal/term-preterm-ehg-database-1.0.1/tpehgdb/"
         # List all files in the directory
         files = os.listdir(directory_path)
 
@@ -134,21 +146,21 @@ class RunOldFiles:
 
 
         print("Total number of Errors: ", cnt)
-        np.savetxt('term_features.txt', term_features_list, fmt='%f', delimiter='\t')
-        np.savetxt('preterm_features.txt', preterm_features_list, fmt='%f', delimiter='\t')
+        add_to_csv("term_features.csv", term_features_list)
+        add_to_csv("preterm_features.csv", preterm_features_list)
 
 
 
 
 
-# run_all_term_files = RunTermFiles()
-# run_all_term_files.makeFeatureArray()
+run_all_term_files = RunTermFiles()
+run_all_term_files.makeFeatureArray()
 #
 # run_all_preterm_files = RunPretermFiles()
 # run_all_preterm_files.makeFeatureArray()
 
-run_old_files = RunOldFiles()
-run_old_files.makeFeatureArray()
+# run_old_files = RunOldFiles()
+# run_old_files.makeFeatureArray()
 
 # term_features = np.loadtxt("term_features.txt", delimiter="\t")
 # preterm_features = np.loadtxt("preterm_features.txt", delimiter="\t")
@@ -165,4 +177,4 @@ run_old_files.makeFeatureArray()
 # plt.legend()
 
 # Show the plot
-plt.show()
+# plt.show()

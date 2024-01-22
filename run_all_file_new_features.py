@@ -50,8 +50,6 @@ class RunTermFiles:
 
 
 
-
-
 class RunPretermFiles:
     def __init__(self):
         self.n = 0
@@ -88,7 +86,7 @@ class RunOldFiles:
 
         term_features_list = []
         preterm_features_list = []
-        directory_path = "E:/term-preterm-ehg-database-1.0.1/tpehgdb/"
+        directory_path = "F:/signal/term-preterm-ehg-database-1.0.1/tpehgdb/"
         # List all files in the directory
         files = os.listdir(directory_path)
 
@@ -127,8 +125,10 @@ class RunOldFiles:
                     # peakValue = signal.peak_value()
                     # topologicalFeatures.append(peakValue)
                     allNewFeatures = signal.all_segment_new_features()
+                    if float(gestation) < 31:
+                        print(gestation + "is less than 31")
                     for features in allNewFeatures:
-                        print(features)
+                        # print(features)
                         if float(gestation) >= 37:
                             term_features_list.append(features)
                         else:
@@ -156,6 +156,7 @@ class RunOldFiles:
 
 run_old_files = RunOldFiles()
 run_old_files.makeFeatureArray()
+
 
 # term_features = np.loadtxt("term_features.txt", delimiter="\t")
 # preterm_features = np.loadtxt("preterm_features.txt", delimiter="\t")
