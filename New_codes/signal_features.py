@@ -8,6 +8,7 @@ from scipy.signal import butter, filtfilt, medfilt
 from sklearn import preprocessing
 
 from New_codes.concave_hull_fourier import AlphaConcaveHull
+from New_codes.new_features_extraction import NewFeaturesExtract
 from math import sqrt
 
 class SignalProcess:
@@ -220,6 +221,27 @@ class SignalProcess:
             features = concave_hull.execute()
             result.append(features)
 
+        return result
+
+    def all_segment_new_features(self):
+        result = []
+        for i in range(len(self.contraction_segments)):
+            new_features = NewFeaturesExtract(self.contraction_segments[i], self.record.fs)
+            features = new_features.getFeatures()
+            result.append(features)
+
+        return result
+
+    def combined_features(self):
+        result = []
+        for i in range(len(self.contraction_segments)):
+            # print(i)
+            concave_hull = AlphaConcaveHull(self.contraction_segments[i], 1.785)
+            features = concave_hull.execute()
+            new_features = NewFeaturesExtract(self.contraction_segments[i], self.record.fs)
+            second_features = new_features.getFeatures()
+            features.extend(second_features)
+            result.append(features)
         return result
 
 

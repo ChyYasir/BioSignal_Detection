@@ -45,11 +45,15 @@ class RunFiles:
                     # features = signal.topological_features()
                     # features_list.append(features)
 
-                    allNewFeatures = signal.all_segment_topological_features()
+                    # allTopologicalFeatures = signal.all_segment_topological_features()
+                    # allNewFeatures = signal.all_segment_new_features()
 
-                    for features in allNewFeatures:
+                    allCombinedFeatures = signal.combined_features()
+                    # print(features_list)
+                    for features in allCombinedFeatures:
                         print(features)
                         features_list.append(features)
+
                 except Exception as e:
                     print(f"Error processing {file_name}: {str(e)}")
                     cnt = cnt + 1
@@ -72,3 +76,7 @@ run_early_cesarean.makeFeatureArray()
 #
 # run_early_spontaneous = RunFiles("early_spontaneous", "F:/signal/dataset/early_spontaneous/")
 # run_early_spontaneous.makeFeatureArray()
+
+
+# run_later_spontaneous = RunFiles("later_spontaneous", "F:/signal/dataset/later_spontaneous/")
+# run_later_spontaneous.makeFeatureArray()

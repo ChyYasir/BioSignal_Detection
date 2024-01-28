@@ -102,7 +102,7 @@ class AlphaConcaveHull:
         longer_side = max(rect_width, rect_height)
         shorter_side = min(rect_width, rect_height)
         eccentricity = longer_side / shorter_side if shorter_side != 0 else 0
-        return [area, perimeter, circularity, convexity, variance, bending_energy, rectangularity, eccentricity]
+        return [area, perimeter, circularity, variance, bending_energy]
         # print("Variance = " , str(variance))
 
     def execute(self):
