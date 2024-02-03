@@ -113,7 +113,7 @@ class AlphaConcaveHull:
         # Concave Hull calculation
         ch = ConcaveHull()
         ch.loadpoints(fourier_points)
-        ch.calculatehull(tol=1)
+        ch.calculatehull(tol=1.7)
         ch.polygon()
         boundary_points = np.array(ch.boundary.exterior.coords)
         boundary_x, boundary_y = boundary_points[:, 0], boundary_points[:, 1]

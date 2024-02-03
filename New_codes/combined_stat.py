@@ -2,7 +2,7 @@ import pandas as pd
 
 def calculate_statistics(file_name, row_label):
 
-    df = pd.read_csv(file_name, usecols=[0, 1, 2, 4, 5])
+    df = pd.read_csv(file_name, usecols=[0, 1, 2, 3, 4])
 
 
     df.columns = ['Area', 'Perimeter', 'Circularity', 'Variance', 'Bending Energy']

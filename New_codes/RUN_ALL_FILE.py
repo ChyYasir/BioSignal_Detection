@@ -65,8 +65,8 @@ class RunFiles:
         save_to_csv(str(self.group_name) + "_features.csv", features_list)
 
 
-run_early_cesarean = RunFiles("early_cesarean", "F:/signal/dataset/early_cesarean/")
-run_early_cesarean.makeFeatureArray()
+# run_early_cesarean = RunFiles("early_cesarean", "F:/signal/dataset/early_cesarean/")
+# run_early_cesarean.makeFeatureArray()
 
 # run_early_induced = RunFiles("early_induced", "F:/signal/dataset/early_induced/")
 # run_early_induced.makeFeatureArray()
@@ -74,8 +74,8 @@ run_early_cesarean.makeFeatureArray()
 # run_early_induced_cesarean = RunFiles("early_induced-cesarean", "F:/signal/dataset/early_induced-cesarean/")
 # run_early_induced_cesarean.makeFeatureArray()
 #
-# run_early_spontaneous = RunFiles("early_spontaneous", "F:/signal/dataset/early_spontaneous/")
-# run_early_spontaneous.makeFeatureArray()
+run_early_spontaneous = RunFiles("early_spontaneous", "F:/signal/dataset/early_spontaneous/")
+run_early_spontaneous.makeFeatureArray()
 
 
 # run_later_spontaneous = RunFiles("later_spontaneous", "F:/signal/dataset/later_spontaneous/")
