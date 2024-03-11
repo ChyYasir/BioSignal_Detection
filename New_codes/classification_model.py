@@ -2,10 +2,10 @@ import pandas as pd
 import numpy as np
 from imblearn.over_sampling import SMOTE
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, roc_curve, auc
 from sklearn.model_selection import StratifiedKFold, cross_val_score, train_test_split, GridSearchCV
 from sklearn.svm import SVC
-
+import matplotlib.pyplot as plt
 
 def train_on_svm(X_resampled, y_resampled, X_test, y_test):
     cv_svm = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
@@ -13,7 +13,7 @@ def train_on_svm(X_resampled, y_resampled, X_test, y_test):
                   'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
                   'kernel': ['rbf']}
 
-    grid = GridSearchCV(SVC(), param_grid, refit=True, verbose=3, cv=cv_svm)
+    grid = GridSearchCV(SVC(probability=True), param_grid, refit=True, verbose=3, cv=cv_svm)
 
     # fitting the model for grid search
     grid.fit(X_resampled, y_resampled)
@@ -37,7 +37,22 @@ def train_on_svm(X_resampled, y_resampled, X_test, y_test):
     conf_matrix = confusion_matrix(y_test, y_pred)
     print("Confusion Matrix:")
     print(conf_matrix)
-def train_on_rf(X_resampled, y_resampled, X_test, y_test):
+
+    y_pred_proba = grid.predict_proba(X_test)[:, 1]
+
+    fpr, tpr, _ = roc_curve(y_test, y_pred_proba)
+    roc_auc = auc(fpr, tpr)
+    print("SVM AUC = ", roc_auc)
+    plt.figure()
+    plt.plot(fpr, tpr)
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("Receiver Operating Characteristics - SVM")
+    plt.legend(loc="lower right")
+    plt.show()
+
+
+def train_on_rf(X_resampled, y_resampled, X_test, y_test, X_train, y_train):
     print("For Random Forest")
     param_grid_rf = {
         'n_estimators': [50, 100, 150, 200],
@@ -69,6 +84,19 @@ def train_on_rf(X_resampled, y_resampled, X_test, y_test):
     print("Confusion Matrix:")
     print(conf_matrix)
 
+    y_pred_proba = rf_classifier.predict_proba(X_test)[:, 1]
+
+    fpr, tpr, _ = roc_curve(y_test, y_pred_proba)
+    roc_auc = auc(fpr, tpr)
+    print("RF AUC = ", roc_auc)
+    plt.figure()
+    plt.plot(fpr, tpr)
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("Receiver Operating Characteristics - RF")
+    plt.legend(loc="lower right")
+    plt.show()
+
 
 column_headers = ["area", "perimeter", "circularity", "variance", "bending_energy", "energy", "crest_factor", "mean_frequency", "median_frequency", "peak_to_peak_amplitude", "contraction_intensity", "contraction_power", "shannon_entropy", "sample_entropy", "Dispersion_entropy", "log_detector", "label"]
 
@@ -93,9 +121,25 @@ y= combined_df['label']
 
 
 # Splitting the dataset into the Training set and Test set
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
-
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+#
 smote = SMOTE(random_state=42)
-X_resampled, y_resampled = smote.fit_resample(X_train, y_train)
-train_on_rf(X_resampled, y_resampled, X_test, y_test)
-train_on_svm(X_resampled, y_resampled, X_test, y_test)
+# X_resampled, y_resampled = smote.fit_resample(X_train, y_train)
+# train_on_rf(X_resampled, y_resampled, X_test, y_test)
+# train_on_svm(X_resampled, y_resampled, X_test, y_test)
+
+# Combine only Cesarean and Induced Cesarean datasets
+binary_df_1 = pd.concat([cesarean_df, induced_cesarean_df])
+
+# Select the data for columns
+X_binary_1 = binary_df_1[selected_columns]
+y_binary_1 = binary_df_1['label']
+
+X_train_1, X_test_1, y_train_1, y_test_1 = train_test_split(X_binary_1, y_binary_1, test_size=0.2, random_state=42 , stratify=y_binary_1)
+
+
+X_resampled_1, y_resampled_1 = smote.fit_resample(X_train_1, y_train_1)
+
+
+train_on_rf(X_resampled_1, y_resampled_1, X_test_1, y_test_1, X_train_1, y_train_1)
+train_on_svm(X_resampled_1, y_resampled_1, X_test_1, y_test_1)
