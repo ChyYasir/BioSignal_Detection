@@ -41,13 +41,13 @@ def train_on_svm(X_resampled, y_resampled, X_test, y_test_original, y_test_binar
     for i in range(n_classes):
         fpr[i], tpr[i], _ = roc_curve(y_test_binarized[:, i], y_score_svm[:, i])
         roc_auc[i] = auc(fpr[i], tpr[i])
-
+    class_labels = ["Cesarean vs Rest", "Induced-Cesarean vs Rest", "Spontaneous vs Rest"]
     plt.figure()
     lw = 2
     colors = cycle(['aqua', 'darkorange', 'cornflowerblue'])
     for i, color in zip(range(n_classes), colors):
         plt.plot(fpr[i], tpr[i], color=color, lw=lw,
-                 label='ROC curve of class {0} (area = {1:0.2f})'.format(i, roc_auc[i]))
+                 label=f'ROC curve of {class_labels[i]} (area = {roc_auc[i]:0.2f})')
 
     plt.plot([0, 1], [0, 1], 'k--', lw=lw)
     plt.xlim([0.0, 1.0])
@@ -88,13 +88,14 @@ def train_on_rf(X_resampled, y_resampled, X_test, y_test, X_train, y_train):
         fpr[i], tpr[i], _ = roc_curve(y_test_binarized[:, i], y_score_rf[:, i])
         roc_auc[i] = auc(fpr[i], tpr[i])
 
+    class_labels = ["Cesarean vs Rest", "Induced-Cesarean vs Rest", "Spontaneous vs Rest"]
     # Plotting
     plt.figure()
     lw = 2
     colors = cycle(['aqua', 'darkorange', 'cornflowerblue'])
     for i, color in zip(range(n_classes), colors):
         plt.plot(fpr[i], tpr[i], color=color, lw=lw,
-                 label='ROC curve of class {0} (area = {1:0.2f})'.format(i, roc_auc[i]))
+                 label=f'ROC curve of {class_labels[i]} (area = {roc_auc[i]:0.2f})')
 
     plt.plot([0, 1], [0, 1], 'k--', lw=lw)
     plt.xlim([0.0, 1.0])
@@ -160,6 +161,6 @@ y_test_binarized = label_binarize(y_test, classes=[0, 1, 2])
 n_classes = y_train_binarized.shape[1]
 
 # Now train your models
-# train_on_rf(X_resampled, y_resampled, X_test, y_test_binarized, X_train, y_train_binarized)
+train_on_rf(X_resampled, y_resampled, X_test, y_test_binarized, X_train, y_train_binarized)
 train_on_svm(X_resampled, y_resampled, X_test, y_test, y_test_binarized)
 
