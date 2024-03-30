@@ -151,8 +151,7 @@ class SignalProcess:
         # mean_value = np.mean(self.modulated_signal)
         # std_deviation = np.std(self.modulated_signal)
         # h = 2
-        #
-        #
+
         # self.threshold = mean_value + h * std_deviation
         # t = mean + h * std
 
@@ -199,9 +198,10 @@ class SignalProcess:
                         hundred = int(100 * fs)
                         lft = max(l, peak_idx - fifty)
                         rht = lft + hundred
-                        for j in range(lft, rht + 1):
+                        mn = min(rht + 1, len(self.rms_values))
+                        for j in range(lft, mn):
                             new_contraction_segment.append(self.rms_values[j])
-                            self.new_contraction_array[j] = self.rms_values[j]
+                            # self.new_contraction_array[j] = self.rms_values[j]
                         self.contraction_segments.append(new_contraction_segment)
 
                     l = -1
@@ -244,13 +244,20 @@ class SignalProcess:
             result.append(features)
         return result
 
-
-
+    def combined_features_signal(self):
+        result = []
+        concave_hull = AlphaConcaveHull(self.concave_signal, 1.785)
+        feature = concave_hull.execute()
+        new_features = NewFeaturesExtract(self.concave_signal, self.record.fs)
+        second_features = new_features.getFeatures()
+        result = feature + second_features
+        return result
 
 
 # print(1)
 # early_cesarean = SignalProcess("icehg666","F:/signal/dataset/early_cesarean/")
-# #
+#
 # early_cesarean.process();
+# print(early_cesarean.combined_features_signal())
 
 
