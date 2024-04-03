@@ -3,24 +3,22 @@ import shutil
 
 class RunOldFiles:
     def makeFolders(self, signal_type):
-        directory_path = f"F:/signal/dataset/{signal_type}"
+        directory_path = f"F:/signal/files/{signal_type}"
         cnt = 0
 
         for file_name in os.listdir(directory_path):
             if file_name.endswith(".hea"):
                 file_path = os.path.join(directory_path, file_name)
-                weight, height = self.extract_info_from_hea(file_path)
-                weight_f = float(weight)
-                height_f = float(height)
-                height_f = height_f / 100
-                BMI = weight_f / (height_f * height_f)
-
-                print("Weight = ", weight_f, " Height = ", height_f, " BMI = ", BMI)
+                # weight, height = self.extract_info_from_hea(file_path)
+                # weight_f = float(weight)
+                # height_f = float(height)
+                # height_f = height_f / 100
+                # BMI = weight_f / (height_f * height_f)
+                BMI = self.extract_BMI_from_hea(file_path)
+                # print("Weight = ", weight_f, " Height = ", height_f, " BMI = ", BMI)
                 file_name_without_extension = file_name.split(".")[0]
 
                 try:
-
-
                     if BMI > 35:
                         self.create_copy(file_name_without_extension, signal_type, "unhealthy_obese")
                     elif BMI >= 30 and BMI < 35:
@@ -57,9 +55,24 @@ class RunOldFiles:
         return weight, height
 
     @staticmethod
+    def extract_BMI_from_hea(file_path):
+        BMI = None
+
+        with open(file_path, 'r') as file:
+            for line in file:
+                if "BMI at recording" in line:
+                    BMI = line.split(":")[-1].strip()
+
+
+        # print(f"Gestation: {gestation}, Rectime: {rectime}")
+        return float(BMI)
+
+
+
+    @staticmethod
     def create_copy(file_name, signal_type, folder_name):
 
-        source_path = f"F:/signal/dataset/{signal_type}"
+        source_path = f"F:/signal/files/{signal_type}"
         destination_path = f"F:/signal/dataset/{signal_type}/{folder_name}"
 
         if not os.path.exists(destination_path):
@@ -110,14 +123,14 @@ class RunNewFiles:
 
 
 
-# make_early_later_spontaneous = RunOldFiles()
+make_early_later_spontaneous = RunOldFiles()
 # make_early_later_spontaneous.makeFolders("early_cesarean")
 # make_early_later_spontaneous.makeFolders("early_induced")
 # make_early_later_spontaneous.makeFolders("early_induced-cesarean")
-# make_early_later_spontaneous.makeFolders("later_cesarean")
-# make_early_later_spontaneous.makeFolders("later_induced")
+make_early_later_spontaneous.makeFolders("later_cesarean")
+make_early_later_spontaneous.makeFolders("later_induced")
+make_early_later_spontaneous.makeFolders("later_spontaneous")
 # make_early_later_spontaneous.makeFolders("later_induced-cesarean")
-
-directory = "F:/signal/files"
-runner = RunNewFiles(directory)
-runner.run()
+# directory = "F:/signal/files"
+# runner = RunNewFiles(directory)
+# runner.run()
