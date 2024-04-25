@@ -7,7 +7,7 @@ from scipy.interpolate import interp1d
 from sklearn import preprocessing
 import copy
 from math import sqrt
-
+from TFdomain_feature_extraction import TFdomainFeaturesExtract
 class SignalManipulation:
     def __init__(self,  signal_name):
         # self.header_file = header_file
@@ -425,12 +425,15 @@ class SignalManipulation:
         plt.show()
 
     def contraction_segments_power_density_welch(self):
-        print(self.contraction_segments)
+        # print(self.contraction_segments)
+        features = []
         for i, segment in enumerate(self.contraction_segments):
-            print(f"Contraction Segment {i + 1}:")
-            self.power_density_welch(segment)
-
-
+            # print(f"Contraction Segment {i + 1}:")
+            max_power_frequency, frequency_with_max_power = self.power_density_welch(segment)
+            tfdomain_features = TFdomainFeaturesExtract(segment, 20)
+            energy, crest_factor, mean_frequency, median_frequency, peak_to_peak_amplitude, contraction_intensity, contraction_power, shannon_entropy, sample_entropy, Dispersion_entropy, log_detector = tfdomain_features.getFeatures()
+            features.append([max_power_frequency, frequency_with_max_power, energy, crest_factor, mean_frequency, median_frequency, peak_to_peak_amplitude, contraction_intensity, contraction_power, shannon_entropy, sample_entropy, Dispersion_entropy, log_detector])
+        return features
 # Example usage:
 
 # header_file = 'F:/signal/dataset/later_cesarean/over_weight/icehg675.hea'
