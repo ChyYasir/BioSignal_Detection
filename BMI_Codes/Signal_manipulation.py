@@ -8,6 +8,7 @@ from sklearn import preprocessing
 import copy
 from math import sqrt
 from TFdomain_feature_extraction import TFdomainFeaturesExtract
+from concave_hull_fourier import AlphaConcaveHull
 class SignalManipulation:
     def __init__(self,  signal_name):
         # self.header_file = header_file
@@ -78,7 +79,7 @@ class SignalManipulation:
 
 
         lowcut = 0.8  # Define your lowcut frequency
-        highcut = 4 # Define your highcut frequency
+        highcut = 3 # Define your highcut frequency
         nyquist_freq = 0.5 * self.sampling_frequency
         print(self.sampling_frequency, nyquist_freq)
         low = lowcut / nyquist_freq
@@ -434,17 +435,24 @@ class SignalManipulation:
             energy, crest_factor, mean_frequency, median_frequency, peak_to_peak_amplitude, contraction_intensity, contraction_power, shannon_entropy, sample_entropy, Dispersion_entropy, log_detector = tfdomain_features.getFeatures()
             features.append([max_power_frequency, frequency_with_max_power, energy, crest_factor, mean_frequency, median_frequency, peak_to_peak_amplitude, contraction_intensity, contraction_power, shannon_entropy, sample_entropy, Dispersion_entropy, log_detector])
         return features
+
+    def concave_signal_features(self):
+        ConcaveHull = AlphaConcaveHull(self.concave_signal, 1.785)
+        features = ConcaveHull.execute()
+        return [features]
 # Example usage:
 
 # header_file = 'F:/signal/dataset/later_cesarean/over_weight/icehg675.hea'
 # dat_file = 'F:/signal/dataset/later_cesarean/over_weight/icehg675.dat'
-# signal_name = 'F:/signal/dataset/later_cesarean/over_weight/icehg675'
+signal_name = 'F:/signal/dataset/later_cesarean/over_weight/ice043_p_1of2'
 # adc_resolution = 131.068
 #
 # # Create an instance of SignalManipulation
-# signal_manipulator = SignalManipulation(header_file, dat_file, adc_resolution, signal_name)
+signal_manipulator = SignalManipulation(signal_name)
 # # signal_manipulator.plot_single_signal()
-# signal_manipulator.process(1)
+signal_manipulator.process(1)
+signal_manipulator.concave_signal_features()
+
 # # signal_manipulator.plot_rms_values()
 # signal_manipulator.contraction_segments_power_density_welch()
 # Use the methods of the SignalManipulation instance as needed

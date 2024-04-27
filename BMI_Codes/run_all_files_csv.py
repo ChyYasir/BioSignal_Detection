@@ -19,14 +19,18 @@ csv_file_name = f"{signal_type}_{signal_bmi}.csv"
 
 # Open the CSV file in write mode in the current directory
 csv_file_path = csv_file_name
-
+concave = True
 # Open the CSV file in write mode
 with open(csv_file_path, mode='w', newline='') as csv_file:
     # Define the CSV writer
     csv_writer = csv.writer(csv_file)
 
     # Write the header row
-    csv_writer.writerow(['Max Power/Frequency', 'Frequency with Max Power', "energy", "crest_factor", "mean_frequency", "median_frequency", "peak_to_peak_amplitude", "contraction_intensity", "contraction_power", "shannon_entropy", "sample_entropy", "Dispersion_entropy", "log_detector"])
+    if concave:
+        csv_writer.writerow(
+            ['Area', 'Perimeter', "Circularity", "Variance", "Bending Energy"])
+    else:
+        csv_writer.writerow(['Max Power/Frequency', 'Frequency with Max Power', "energy", "crest_factor", "mean_frequency", "median_frequency", "peak_to_peak_amplitude", "contraction_intensity", "contraction_power", "shannon_entropy", "sample_entropy", "Dispersion_entropy", "log_detector"])
 
     # Iterate over all files in the directory
     for filename in os.listdir(signal_directory):
@@ -46,7 +50,11 @@ with open(csv_file_path, mode='w', newline='') as csv_file:
                 for signal_index in [1, 3, 5]:
 
                     signal_manipulator.process(signal_number=signal_index)
-                    features = signal_manipulator.contraction_segments_power_density_welch()
+                    features = None
+                    if concave:
+                        features = signal_manipulator.concave_signal_features()
+                    else:
+                        features = signal_manipulator.contraction_segments_power_density_welch()
 
                     for row in features:
                         print(row)
@@ -60,8 +68,11 @@ with open(csv_file_path, mode='w', newline='') as csv_file:
                 # Process all signals from index 0 to 15
                 for signal_index in range(16):
                     signal_manipulator.process(signal_number=signal_index)
-                    features = signal_manipulator.contraction_segments_power_density_welch()
-
+                    features = None
+                    if concave:
+                        features = signal_manipulator.concave_signal_features()
+                    else:
+                        features = signal_manipulator.contraction_segments_power_density_welch()
                     for row in features:
                         print(row)
                         # Write the results to the CSV file
