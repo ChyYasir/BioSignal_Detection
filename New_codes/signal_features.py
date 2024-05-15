@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import copy
 
 from scipy.interpolate import interp1d
-from scipy.signal import butter, filtfilt, medfilt
+from scipy.signal import butter, filtfilt, medfilt, welch
 from sklearn import preprocessing
 
 from New_codes.concave_hull_fourier import AlphaConcaveHull
@@ -64,7 +64,7 @@ class SignalProcess:
         # print(fs)
         # Create self.time axis in seconds for the entire signal
         self.time = np.arange(0, self.signal_data.shape[0]) / fs
-
+        print(self.signal_data.shape[0])
         # Choose the signal index you want to analyze
         normal_signal = self.signal_data[:, 0]
         filtered_signal = self.signal_data[:, 1]
@@ -162,7 +162,7 @@ class SignalProcess:
         self.contraction_array = []
 
         self.contraction_segments = []
-
+        print(len(self.modulated_signal))
         for i in range(0, len(self.rms_values)):
             self.new_contraction_array.append(self.threshold)
             self.contraction_array.append(self.threshold)
@@ -207,7 +207,8 @@ class SignalProcess:
                     l = -1
                     r = -1
 
-
+        # self.power_density_fft(self.concave_signal)
+        # self.power_density_welch(self.concave_signal)
         # print(self.topological_features())
     def topological_features(self):
         concave_hull = AlphaConcaveHull(self.concave_signal, 1.785)
@@ -254,10 +255,58 @@ class SignalProcess:
         return result
 
 
+    # def power_density_fft(self, signal):
+    #     # Compute the FFT
+    #     n = len(signal)
+    #     fs = self.record.fs
+    #     frequencies = np.fft.rfftfreq(n, d=1 / fs)
+    #     fft_result = np.fft.rfft(signal)
+    #
+    #     # Compute the power spectral density
+    #     psd = np.abs(fft_result) ** 2 / (fs * n)
+    #     # Plot the power spectral density
+    #     plt.figure(figsize=(10, 6))
+    #     plt.semilogy(frequencies, psd)  # Plot in logarithmic scale
+    #     plt.title('Power Spectral Density of Signal(FFT)')
+    #     plt.xlabel('Frequency (Hz)')
+    #     plt.ylabel('Power/Frequency (dB/Hz)')
+    #     plt.grid(True)
+    #     plt.show()
+
+    def power_density_welch(self, signal):
+        fs = self.record.fs
+        # Compute the power spectral density using Welch's method
+        frequencies, psd = welch(signal, fs=fs, nperseg=1024)
+
+        # Plot the power spectral density
+        plt.figure(figsize=(10, 6))
+        plt.semilogy(frequencies, psd)  # Plot in logarithmic scale
+        plt.title('Power Spectral Density of Signal(Welch)')
+        plt.xlabel('Frequency (Hz)')
+        plt.ylabel('Power/Frequency (dB/Hz)')
+        plt.grid(True)
+        plt.show()
+
+    def contraction_segments_power_density_welch(self):
+
+        for i, segment in enumerate(self.contraction_segments):
+            print(f"Contraction Segment {i + 1}:")
+            self.power_density_welch(segment)
+
 # print(1)
-# early_cesarean = SignalProcess("icehg666","F:/signal/dataset/early_cesarean/")
+early_cesarean = SignalProcess("icehg675","F:/signal/dataset/later_cesarean/over_weight/")
 #
-# early_cesarean.process();
+# early_cesarean.process()
+# print(early_cesarean.signal_data)
+
+# for i in range(5):
+#     print("Signal number ", i)
+#     for val in early_cesarean.signal_data[:, i]:
+#         print(val)
+# print(early_cesarean.signal_data[:, 0])
+for val in early_cesarean.signal_data[:, 0]:
+    print(val)
+# early_cesarean.contraction_segments_power_density_welch()
 # print(early_cesarean.combined_features_signal())
 
 
