@@ -15,9 +15,15 @@ y = df ['activity']
 ros = RandomOverSampler(sampling_strategy='not majority')
 x_res, y_res = ros.fit_resample(x, y)
 ax = y_res.value_counts()
-# print (x_res)
+print (x_res)
 print(ax)
 
+
+df_resampled = x_res.copy()
+df_resampled['activity'] = y_res
+
+# Save the resampled data to a CSV file
+df_resampled.to_csv('oversampled_data.csv', index=False)
 
 # Display the DataFrames
 # print("Data 1:")
