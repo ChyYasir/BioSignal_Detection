@@ -130,12 +130,33 @@ def plot_roc_svm():
     plt.legend(loc="lower right")
     plt.show()
 
+def plot_combined_roc():
+    for class_a, class_b, label in class_pairs:
+        X_train, X_test, y_train, y_test = prepare_data_for_binary_classifcation(combined_df, class_a, class_b)
+        X_resampled, y_resampled = smote.fit_resample(X_train, y_train)
+
+        fpr_rf, tpr_rf, roc_auc_rf = train_on_rf(X_resampled, y_resampled, X_test, y_test, X_train, y_train)
+        fpr_svm, tpr_svm, roc_auc_svm = train_on_svm(X_resampled, y_resampled, X_test, y_test)
+
+        plt.plot(fpr_rf, tpr_rf, label=f'RF - {label} (AUC = {roc_auc_rf:.2f})')
+        plt.plot(fpr_svm, tpr_svm, label=f'SVM - {label} (AUC = {roc_auc_svm:.2f})')
+
+    plt.plot([0, 1], [0, 1], 'k--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver Operating Characteristic Comparisons (RF vs SVM)')
+    plt.legend(loc="lower right")
+    plt.show()
+
+
 column_headers = ["area", "perimeter", "circularity", "variance", "bending_energy", "energy", "crest_factor", "mean_frequency", "median_frequency", "peak_to_peak_amplitude", "contraction_intensity", "contraction_power", "shannon_entropy", "sample_entropy", "Dispersion_entropy", "log_detector", "label"]
 
 # Reload the datasets with the correct headers
-cesarean_df = pd.read_csv('early_cesarean_features.csv', names=column_headers, header=None)
-induced_cesarean_df = pd.read_csv('early_induced-cesarean_features.csv', names=column_headers, header=None)
-spontaneous_df = pd.read_csv('early_spontaneous_features.csv', names=column_headers, header=None)
+cesarean_df = pd.read_csv('early_cesarean_features.csv')
+induced_cesarean_df = pd.read_csv('early_induced-cesarean_features.csv' )
+spontaneous_df = pd.read_csv('early_spontaneous_features.csv')
 # Assigning labels
 cesarean_df['label'] = 0
 induced_cesarean_df['label'] = 1
@@ -163,14 +184,15 @@ smote = SMOTE(random_state=42)
 # # Select the data for columns
 # X_binary_1 = binary_df_1[selected_columns]
 # y_binary_1 = binary_df_1['label']
-class_pairs = [(0, 1, "Cesarean vs. Induced-Cesarean"),(1, 2, 'Induced-Cesarean vs. Spontaneous'),
-                   (0, 2, 'Cesarean vs. Spontaneous') ]
+# class_pairs = [(0, 1, "Cesarean vs. Induced-Cesarean"),(1, 2, 'Induced-Cesarean vs. Spontaneous'),
+#                    (0, 2, 'Cesarean vs. Spontaneous') ]
 
-plot_roc_rf()
-plot_roc_svm()
+class_pairs = [(0, 1, "Cesarean vs. Induced-Cesarean")]
 
+# plot_roc_rf()
+# plot_roc_svm()
+plot_combined_roc()
 # X_resampled_1, y_resampled_1 = smote.fit_resample(X_train_1, y_train_1)
-#
-#
+
 # train_on_rf(X_resampled_1, y_resampled_1, X_test_1, y_test_1, X_train_1, y_train_1)
 # train_on_svm(X_resampled_1, y_resampled_1, X_test_1, y_test_1)
