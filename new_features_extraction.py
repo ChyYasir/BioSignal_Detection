@@ -9,7 +9,6 @@ class NewFeaturesExtract:
         self.signal = signal
         self.sampling_frequency = sampling_frequency
 
-
     def plot_psd(self, frequencies, power_spectrum, mean_frequency):
         plt.figure(figsize=(10, 6))
         plt.plot(frequencies, power_spectrum)

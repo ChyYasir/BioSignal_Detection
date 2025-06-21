@@ -1,0 +1,39 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# VS Code, PyCharm, and other IDE settings
+.vscode/
+.idea/
+
+# Data files (optional — only if you don't want them versioned)
+*.csv
+
+# Test and temporary files
+test.py
+*.log
+
+# System-specific files
+.DS_Store
+Thumbs.db
+
+# Virtual environments
+env/
+venv/
+.venv/
+
+# Compiled files
+*.pyd
+*.pyo
+
+# Backup files
+*~
+*.bak
+
+# Ignore large folders or generated results (optional)
+files/
+class_codes/

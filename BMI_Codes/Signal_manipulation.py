@@ -146,23 +146,39 @@ class SignalManipulation:
     #     filtered_signal = filtered_wp
     #     return filtered_signal
     def plot_filtered_signal_with_original(self, signal_number=0, lowcut=0.8, highcut=4):
-        signal = self.signals[signal_number]
-        signal_mV = signal / self.adc_resolution
+        signal = self.signals[:, signal_number]
+        signal_mV = signal
         original_signal_excluded = signal_mV[500:-1000]
+        print(self.signals.shape)
         filtered_signal = self.butter_bandpass_filter(signal_mV[500:-1000], lowcut, highcut, self.sampling_frequency)
         time_axis = np.arange(500, signal.size-1000) / self.sampling_frequency
 
-        plt.figure(figsize=(15, 4))
-        plt.plot(time_axis, original_signal_excluded, color='blue', label='Original Signal')
-        plt.title(f'Signal {signal_number+1}: Original and Filtered (Butterworth Bandpass)')
-        plt.ylabel('Amplitude')
-        plt.xlabel('Time (seconds)')
-        plt.legend()
+        fig, (ax1_2, ax3) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+
+        plt.figure(figsize=(10, 6))
+        ax1_2.plot(time_axis, original_signal_excluded, label="Original Signal", color="blue")
+        # ax1_2.plot(self.time[exclude_start:exclude_end], filtered_signal[exclude_start:exclude_end],
+        #            label="Filtered Signal", color="red")
+
+        ax1_2.set_ylabel("Amplitude")
+        ax1_2.legend()
+
+        ax3.plot(time_axis, filtered_signal,
+                 label="Filtered Signal", color="green")
+
+        ax3.set_xlabel("Time(seconds)")
+        ax3.set_ylabel("Amplitude")
+        ax3.legend()
+
+        plt.title(f'Signal Plot ')
+
+        # Adjust layout
+        plt.tight_layout()
         plt.show()
 
     def plot_filtered_signal_for_duration(self, signal_number=0, lowcut=0.8, highcut=4, duration=10):
         signal = self.signals[signal_number]
-        signal_mV = signal / self.adc_resolution
+        signal_mV = signal
         filtered_signal = self.butter_bandpass_filter(signal, lowcut, highcut, self.sampling_frequency)
         n_samples_duration = int(duration * self.sampling_frequency)
         original_signal_excluded = signal[:n_samples_duration]
@@ -451,7 +467,7 @@ signal_name = 'F:/signal/dataset/later_cesarean/over_weight/ice043_p_1of2'
 signal_manipulator = SignalManipulation(signal_name)
 # # signal_manipulator.plot_single_signal()
 signal_manipulator.process(1)
-signal_manipulator.concave_signal_features()
+# signal_manipulator.concave_signal_features()
 
 # # signal_manipulator.plot_rms_values()
 # signal_manipulator.contraction_segments_power_density_welch()

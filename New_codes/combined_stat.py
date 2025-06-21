@@ -4,7 +4,6 @@ def calculate_statistics(file_name, row_label):
 
     df = pd.read_csv(file_name, usecols=[0, 1, 2, 3, 4])
 
-
     df.columns = ['Area', 'Perimeter', 'Circularity', 'Variance', 'Bending Energy']
 
     stats_max = pd.Series([df[col].max() for col in df.columns], index=df.columns, name=row_label + " (Max)")

@@ -297,15 +297,15 @@ class SignalProcess:
 early_cesarean = SignalProcess("icehg675","F:/signal/dataset/later_cesarean/over_weight/")
 #
 # early_cesarean.process()
-# print(early_cesarean.signal_data)
+print(early_cesarean.signal_data)
 
 # for i in range(5):
 #     print("Signal number ", i)
 #     for val in early_cesarean.signal_data[:, i]:
 #         print(val)
 # print(early_cesarean.signal_data[:, 0])
-for val in early_cesarean.signal_data[:, 0]:
-    print(val)
+# for val in early_cesarean.signal_data[:, 0]:
+#     print(val)
 # early_cesarean.contraction_segments_power_density_welch()
 # print(early_cesarean.combined_features_signal())
 

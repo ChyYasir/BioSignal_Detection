@@ -46,7 +46,6 @@ class AlphaConcaveHull:
         vertices = []
         for i in range(0, n):
             vertices.append((x_edges[i], y_edges[i]))
-
             area = area + abs((x_edges[i]* y_edges[(i+1)%n]) - (x_edges[(i+1)%n]*y_edges[i]))
             dis_x = (x_edges[(i+1)%n] - x_edges[i]) * (x_edges[(i+1)%n] - x_edges[i])
             dis_y = (y_edges[(i+1)%n] - y_edges[i]) * (y_edges[(i+1)%n] - y_edges[i])

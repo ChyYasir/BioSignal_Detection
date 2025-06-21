@@ -4,8 +4,8 @@ from Signal_manipulation import SignalManipulation
 
 # Directory containing the signal files
 
-signal_type = "later_cesarean"
-signal_bmi = "over_weight"
+signal_type = "later_spontaneous"
+signal_bmi = "healthy_obese"
 signal_directory = f"F:/signal/dataset/{signal_type}/{signal_bmi}/"
 
 # Extract the parent directory name for the CSV file name
@@ -19,7 +19,7 @@ csv_file_name = f"{signal_type}_{signal_bmi}.csv"
 
 # Open the CSV file in write mode in the current directory
 csv_file_path = csv_file_name
-concave = True
+concave = False
 # Open the CSV file in write mode
 with open(csv_file_path, mode='w', newline='') as csv_file:
     # Define the CSV writer

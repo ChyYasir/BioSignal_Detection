@@ -120,7 +120,6 @@ class RunOldFiles:
                 try:
                     signal = SignalProcess(file_name_without_extension, directory_path)
                     signal.process()
-
                     # topologicalFeatures = signal.topological_features()
                     # peakValue = signal.peak_value()
                     # topologicalFeatures.append(peakValue)

@@ -115,18 +115,19 @@ class NewFeaturesExtract:
         peak_to_peak_amplitude = np.max(signal) - np.min(signal)
 
         # For Shannon Entropy
-        squared_values = signal ** 2
+        # squared_values = signal ** 2
+        # # Add a small positive constant to avoid log2(0)
+        # epsilon = 1e-10
+        # shannon_entropy = np.sum(squared_values * np.log2(squared_values + epsilon))
 
-        shannon_entropy = np.sum(squared_values * np.log2(squared_values))
-
-
+        shannon_entropy = 0
         #For Sample Entropy
         m = 2
         r = 0.2
         sample_entropy = self.sample_entropy(signal, m, r)
 
         # For Approximate Entropy
-        Approximate_entropy, Phi = ApEn(signal,m=2)
+        # Approximate_entropy, Phi = ApEn(signal,m=2)
 
         # For Dispersion Entropy
         Dispersion_entropy, Ppi = DispEn(signal, m=2, c=7)
@@ -150,9 +151,7 @@ class NewFeaturesExtract:
 
         contraction_power = np.sum(power_spectrum[L:H + 1] * (self.sampling_frequency / N))
 
-
         #For variance
-
         variance = 0
 
         for i in signal:
@@ -160,5 +159,10 @@ class NewFeaturesExtract:
 
         variance = variance * (1 / (N-1))
 
-        log_detector = np.exp(np.sum(np.log(signal))/N)
+        epsilon = 1e-10  # Small positive constant
+        # Ensure signal values are positive before taking logarithm
+        clean_signal = np.nan_to_num(signal, nan=epsilon, posinf=epsilon, neginf=epsilon)
+
+        # Apply the log function to the absolute values of the signal plus epsilon
+        log_detector = np.exp(np.sum(np.log(np.abs(clean_signal) + epsilon)) / N)
         return [energy, crest_factor, mean_frequency, median_frequency, peak_to_peak_amplitude, contraction_intensity, contraction_power, shannon_entropy, sample_entropy,Dispersion_entropy , log_detector]
