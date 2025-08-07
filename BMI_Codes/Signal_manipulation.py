@@ -95,11 +95,15 @@ class SignalManipulation:
             return butter_filter, 20
         # filtered_signal = self.butter_bandpass_filter(signal, lowcut, highcut, original_fs)
 
-        decimated_signal = decimate(butter_filter, decimation_factor, ftype='fir')
+        decimated_signal = decimate(signal, decimation_factor, ftype='fir')
+        decimated_signal_filtered = decimate(butter_filter, decimation_factor, ftype='fir')
+
 
         # Return the decimated signal and the new sampling frequency
         new_fs = original_fs / decimation_factor
-
+        self.plot_single_signal(signal, 200)
+        self.plot_single_signal(decimated_signal, 20)
+        self.plot_single_signal(decimated_signal_filtered, 20)
         return decimated_signal, new_fs
 
     def plot_single_signal(self, signal, sampling_frequency):
@@ -108,6 +112,9 @@ class SignalManipulation:
         # target_fs = 20
         # decimation_factor = self.sampling_frequency // target_fs
         # processed_signal, new_fs = self.decimate_signal(signal_mV, self.sampling_frequency, target_fs, decimation_factor)
+
+
+        print("length of signal = ", len(signal))
         time_axis = np.arange(len(signal)) / sampling_frequency
         plt.figure(figsize=(15, 4))
         plt.plot(time_axis, signal)
