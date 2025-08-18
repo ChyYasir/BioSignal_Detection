@@ -19,7 +19,7 @@ csv_file_name = f"{signal_type}_{signal_bmi}.csv"
 
 # Open the CSV file in write mode in the current directory
 csv_file_path = csv_file_name
-concave = False
+concave = True
 # Open the CSV file in write mode
 with open(csv_file_path, mode='w', newline='') as csv_file:
     # Define the CSV writer
@@ -50,6 +50,7 @@ with open(csv_file_path, mode='w', newline='') as csv_file:
                 for signal_index in [1, 3, 5]:
 
                     signal_manipulator.process(signal_number=signal_index)
+                    
                     features = None
                     if concave:
                         features = signal_manipulator.concave_signal_features()

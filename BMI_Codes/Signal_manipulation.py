@@ -104,7 +104,7 @@ class SignalManipulation:
         self.plot_single_signal(signal, 200)
         self.plot_single_signal(decimated_signal, 20)
         self.plot_single_signal(decimated_signal_filtered, 20)
-        return decimated_signal, new_fs
+        return decimated_signal_filtered, new_fs
 
     def plot_single_signal(self, signal, sampling_frequency):
         # signal = self.signals[signal_number]
@@ -311,6 +311,8 @@ class SignalManipulation:
             self.zero_crossing_rates.append(zero_crossing_rate)
             power_zero_crossing.append(pow(zero_crossing_rate, 1.2))
             self.timestamps.append(self.time[i])
+
+        print(self.zero_crossing_rates)
         # print(power_zero_crossing)
         # Normalize the power of zero crossing rates
         normalized_power = preprocessing.normalize([power_zero_crossing])[0]
@@ -463,6 +465,18 @@ class SignalManipulation:
         ConcaveHull = AlphaConcaveHull(self.concave_signal, 1.785)
         features = ConcaveHull.execute()
         return [features]
+
+    def get_zero_crossing_rates_array(self):
+        """
+        Return the zero crossing rates array for the current signal.
+        Returns the complete array of zero crossing rates.
+        """
+        if not self.zero_crossing_rates:
+            print("Warning: No zero crossing rates calculated. Run process() first.")
+            return []
+
+        # Return the complete zero crossing rates array
+        return self.zero_crossing_rates
 # Example usage:
 
 # header_file = 'F:/signal/dataset/later_cesarean/over_weight/icehg675.hea'
