@@ -477,6 +477,18 @@ class SignalManipulation:
 
         # Return the complete zero crossing rates array
         return self.zero_crossing_rates
+
+    def get_rms_values_array(self):
+        """
+        Return the RMS values array for the current signal.
+        Returns the complete array of RMS values.
+        """
+        if not self.rms_values:
+            print("Warning: No RMS values calculated. Run process() first.")
+            return []
+
+        # Return the complete RMS values array
+        return self.rms_values
 # Example usage:
 
 # header_file = 'F:/signal/dataset/later_cesarean/over_weight/icehg675.hea'
